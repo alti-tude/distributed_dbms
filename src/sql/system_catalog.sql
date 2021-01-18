@@ -53,7 +53,7 @@ CREATE TABLE DerivedHorizontalFragment (
 );
 
 CREATE TABLE Site (
-    SiteID INT NOT NULL AUTO_INCREMENT,
+    SiteID VARCHAR(255) NOT NULL,
     IP VARCHAR(255) NOT NULL,
     UserName VARCHAR(255),
     Password VARCHAR(255),
@@ -62,7 +62,7 @@ CREATE TABLE Site (
 
 CREATE TABLE LocalMapping (
     FragmentID VARCHAR(255) NOT NULL,
-    SiteID INT NOT NULL,
+    SiteID VARCHAR(255) NOT NULL,
     DBName VARCHAR(255),
     DBUser VARCHAR(255),
     DBPass VARCHAR(255),
@@ -127,7 +127,8 @@ VALUES  ('Theater_D', 'H', 'Theater'),
         ('Reservation', 'N', 'Reservation'),
         ('User', 'N', 'User');
 
-------------------------------------VERTICAL FRAGMENTATION
+/*------------------------------------VERTICAL FRAGMENTATION*/
+
 INSERT INTO VerticalFragment
 SELECT 'Movie_1', AttributeID
 FROM    Attribute
@@ -149,7 +150,7 @@ WHERE   RelationName = 'Movie' AND
             AttributeName = 'MinAllowedAge'
         );
 
-------------------------------------HORIZONTAL FRAGMENTATION
+/*------------------------------------HORIZONTAL FRAGMENTATION*/
 INSERT INTO HorizontalFragment
 SELECT 'Theater_D', AttributeID, '=', 'Delhi'
 FROM    Attribute
@@ -168,7 +169,7 @@ FROM    Attribute
 WHERE   RelationName = 'Theater' AND
         AttributeName = 'Location';
 
-------------------------------------DERIVED HORIZONTAL FRAGMENTATION
+/*------------------------------------DERIVED HORIZONTAL FRAGMENTATION*/
 SET @ScreenTheaterID  = 0;
 SET @TheaterTheaterID = 0;
 
@@ -214,3 +215,29 @@ SELECT 'Show_H', @ShowScreenID, @ScreenScreenID, 'Screen_H';
 INSERT INTO DerivedHorizontalFragment
 SELECT 'Show_M', @ShowScreenID, @ScreenScreenID, 'Screen_M';
 
+/*----------------------------------------------------SITE*/
+
+INSERT INTO Site
+VALUES  ('Hyderabad', '10.3.5.215', 'user', 'iiit123'),
+        ('Mumbai', '10.3.5.214', 'user', 'iiit123'),
+        ('Delhi', '10.3.5.213', 'user', 'iiit123');
+
+/*-----------------------------------------------------LOCAL MAPPING*/
+
+INSERT INTO LocalMapping
+VALUES  ('Theater_D', 'Delhi', 'Samosa', 'Samose', 'Samosa', 'Theater'),
+        ('Theater_H', 'Hyderabad', 'Samosa', 'Samose', 'Samosa', 'Theater'),
+        ('Theater_M', 'Mumbai', 'Samosa', 'Samose', 'Samosa', 'Theater'),
+
+        ('Screen_D', 'Delhi', 'Samosa', 'Samose', 'Samosa', 'Screen'),
+        ('Screen_H', 'Hyderabad', 'Samosa', 'Samose', 'Samosa', 'Screen'),
+        ('Screen_M', 'Mumbai', 'Samosa', 'Samose', 'Samosa', 'Screen'),
+
+        ('Show_D', 'Delhi', 'Samosa', 'Samose', 'Samosa', 'Show'),
+        ('Show_H', 'Hyderabad', 'Samosa', 'Samose', 'Samosa', 'Show'),
+        ('Show_M', 'Mumbai', 'Samosa', 'Samose', 'Samosa', 'Show'),
+
+        ('Movie_1', 'Hyderabad', 'Samosa', 'Samose', 'Samosa', 'Movie'),
+        ('Movie_2', 'Mumbai', 'Samosa', 'Samose', 'Samosa', 'Movie'),
+        ('Reservation', 'Hyderabad', 'Samosa', 'Samose', 'Samosa', 'Reservation'),
+        ('User', 'Delhi', 'Samosa', 'Samose', 'Samosa', 'User');
