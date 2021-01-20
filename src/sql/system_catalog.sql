@@ -233,9 +233,9 @@ VALUES  ('Theater_D', 'Delhi', 'Samosa', 'Samose', 'Samosa', 'Theater'),
         ('Screen_H', 'Hyderabad', 'Samosa', 'Samose', 'Samosa', 'Screen'),
         ('Screen_M', 'Mumbai', 'Samosa', 'Samose', 'Samosa', 'Screen'),
 
-        ('Show_D', 'Delhi', 'Samosa', 'Samose', 'Samosa', 'Show'),
-        ('Show_H', 'Hyderabad', 'Samosa', 'Samose', 'Samosa', 'Show'),
-        ('Show_M', 'Mumbai', 'Samosa', 'Samose', 'Samosa', 'Show'),
+        ('Show_D', 'Delhi', 'Samosa', 'Samose', 'Samosa', 'Screening'),
+        ('Show_H', 'Hyderabad', 'Samosa', 'Samose', 'Samosa', 'Screening'),
+        ('Show_M', 'Mumbai', 'Samosa', 'Samose', 'Samosa', 'Screening'),
 
         ('Movie_1', 'Hyderabad', 'Samosa', 'Samose', 'Samosa', 'Movie'),
         ('Movie_2', 'Mumbai', 'Samosa', 'Samose', 'Samosa', 'Movie'),
