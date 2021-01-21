@@ -28,7 +28,7 @@ CREATE TABLE Screening (
 );
 
 CREATE TABLE Movie (
-    MovieID INT NOT NULL,
+    MovieID INT NOT NULL AUTO_INCREMENT,
     Summary MEDIUMTEXT,
     MinAllowedAge INT,
     PRIMARY KEY (MovieID)

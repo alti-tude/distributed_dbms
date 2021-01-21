@@ -29,7 +29,7 @@ CREATE TABLE Screening (
 );
 
 CREATE TABLE Movie (
-    MovieID INT NOT NULL,
+    MovieID INT NOT NULL AUTO_INCREMENT,
     Name VARCHAR(255) NOT NULL,
     Genre VARCHAR(255),
     IMDBRating FLOAT(2,1),
@@ -37,7 +37,7 @@ CREATE TABLE Movie (
 );
 
 CREATE TABLE Reservation (
-    ReservationID INT NOT NULL,
+    ReservationID INT NOT NULL AUTO_INCREMENT,
     ShowID INT NOT NULL,
     UserEMail VARCHAR(255) NOT NULL,
     SeatNo INT,
