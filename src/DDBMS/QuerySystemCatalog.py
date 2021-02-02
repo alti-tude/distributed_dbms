@@ -13,7 +13,8 @@ SERVER_CONFIG = {
     "user": "Samosa",
     "password": "Samose",
     "host": "localhost",
-    "database": "Samosa"
+    "database": "Samosa",
+    "auth_plugin": "mysql_native_password"
 }
 
 class DB:
