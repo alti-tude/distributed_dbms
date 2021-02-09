@@ -1,6 +1,6 @@
 import moz_sql_parser
 from DDBMS.DB import db 
-from .Exceptions import SQLParserException
+from DDBMS.Exceptions import SQLParserException
 
 class SQLParser:
     def __init__(self):
