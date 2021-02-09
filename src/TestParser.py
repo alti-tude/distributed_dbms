@@ -1,10 +1,16 @@
-from DDBMS.Parser.SQLParser import *
+from DDBMS.DataStructures.Table import Table
+from DDBMS.DataStructures.Predicate import getPredicateObj
+from DDBMS.DataStructures.Column import Column
+from DDBMS.DataStructures.Symbols import Keywords
 
-if __name__ == '__main__':
-    query = input()
+predicate = {
+    'select': [Column(name="id", table="t1")],
+    'from': [Table(name="t1")],
+    'where': {'and': [
+        {'gt': [Column(name="id", table="t1"), 3]},
+        {'eq': [Column(name="a", table="t1"), Column(name="b", table="t2")]},
+        {'eq': [Column(name="c", table="t1"), Column(name="b", table="t2")]},
+    ]}
+}
 
-    parsed_query = parse_sql(query)
-    print(parsed_query)
-
-    verify(parsed_query)
-        
+print(getPredicateObj(predicate))
