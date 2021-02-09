@@ -2,7 +2,7 @@ import mysql.connector
 import pandas as pd
 
 class DB:
-    def __init__(self, *, config):
+    def __init__(self, config):
         self.config = config
 
     def execute(self, query_function):

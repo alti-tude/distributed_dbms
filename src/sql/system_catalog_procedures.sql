@@ -15,7 +15,7 @@ CREATE PROCEDURE getSites(IN fragment_id VARCHAR(255))
 BEGIN
     SELECT  *
     FROM    LocalMapping 
-            INNER JOIN Site ON Site.SiteID = LocalMapping.SiteID
+            NATURAL JOIN Site
     WHERE   FragmentID = fragment_id;
 END $$
 DELIMITER ;

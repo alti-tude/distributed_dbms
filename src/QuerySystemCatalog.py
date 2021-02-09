@@ -1,22 +1,6 @@
 import argparse
-from DDBMS.DB import DB
-
-LOCAL_CONFIG = {
-    "user": "ddbms2",
-    "password": "ddbms",
-    "host": "localhost",
-    "database": "ddbms"
-}
-
-SERVER_CONFIG = {
-    "user": "Samosa",
-    "password": "Samose",
-    "host": "localhost",
-    "database": "Samosa",
-    "auth_plugin": "mysql_native_password"
-}
-
-db = DB(config=LOCAL_CONFIG)
+from DDBMS.DB import db
+import Config
 
 @db.execute
 def getFragments(relation_name):
@@ -31,7 +15,7 @@ def getSites(fragment_name):
 parser = argparse.ArgumentParser()
 parser.add_argument("--get-fragments", dest='method', default=argparse.SUPPRESS, action='store_const', const = getFragments)
 parser.add_argument("--get-sites", dest='method', default=argparse.SUPPRESS, action='store_const', const = getSites)
-parser.add_argument("--server-config", dest='config', default=LOCAL_CONFIG, action='store_const', const=SERVER_CONFIG)
+parser.add_argument("--server-config", dest='config', default=Config.LOCAL_DB_CONFIG, action='store_const', const=Config.SERVER_DB_CONFIG)
 parser.add_argument("key", type=str)
 args = parser.parse_args()
 
