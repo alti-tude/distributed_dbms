@@ -18,23 +18,31 @@ def get_schema():
 # Write this recursively for each select
 def verify(query):
     if 'from' not in query:
-        raise SQLVerifyException("Incorrect query, no from clause found in query")
+        raise SQLVerifyException("No FROM clause found in query")
 
     schema = get_schema()
     application_relations = schema.RelationName.unique()
 
+    from_tables = [query['from']] if isinstance(query['from'], str) else query['from']
     table_alias = {} # Maps alias to actual name. Stores all tables
-    for table in query['from']:
+    for table in from_tables:
+        relation_name = table
         if (
-            type(table) is dict and 
+            isinstance(table, dict) and 
             'name' in table and 
             'value' in table and
             (table['name'] not in table_alias)
         ):
             table_alias[table['name']] = table['value']
-        elif type(table) is str and table not in table_alias:
+            relation_name = table['value']
+        elif isinstance(table, str) and table not in table_alias:
             table_alias[table] = table
         else:
             raise SQLVerifyException("Invalid query")
 
+        if relation_name not in application_relations:
+            raise SQLVerifyException("Invalid relation name", relation_name)
+
     print(table_alias)
+
+    
