@@ -3,7 +3,7 @@ from DDBMS.DB import db
 from DDBMS.Exceptions import *
 import DDBMS.DataStructures as DataStructures
 
-def parseSql(query):
+def parse_sql(query):
     query = query.replace('"', "'")
     try:
         return moz_sql_parser.parse(query)
@@ -38,19 +38,22 @@ def verify(query):
     alias_table_map = get_from_tables(application_relations, query['from'])
     print(alias_table_map)
 
-    select_columns, select_all_present = get_select_columns(query['select']) 
-    print(select_columns, select_all_present)
+    select_columns = get_select_columns(query['select'], 
+                                        alias_table_map,
+                                        schema[['RelationName', 'AttributeName']]) 
+    # print(select_columns, select_all_present)
 
-    verify_select_columns(select_columns, 
-                          select_all_present,
-                          alias_table_map,
-                          schema[['RelationName', 'AttributeName']])
+    print(select_columns)
+    select_columns = verify_select_columns(select_columns,
+                                           alias_table_map,
+                                           schema[['RelationName', 'AttributeName']])
 
+    print(select_columns)
     # Do select_all_present logic
 
 
 def get_from_tables(application_relations, from_query):
-    from_tables = [from_query] if isinstance(from_query, str) else from_query
+    from_tables = [from_query] if not isinstance(from_query, list) else from_query
     table_alias = {} # Maps alias to actual name. Stores all tables
 
     for table in from_tables:
@@ -74,7 +77,7 @@ def get_from_tables(application_relations, from_query):
     return table_alias
 
 
-def get_select_columns(select_query):
+def get_select_columns(select_query, alias_table_map, schema):
     select_all_present = False
     select_columns = []
     select_attrs = [select_query] if not isinstance(select_query, list) else select_query
@@ -86,6 +89,10 @@ def get_select_columns(select_query):
         elif isinstance(attr, dict):
             cur_column.name = attr['value']
             
+            '''
+            Query: select max(Name) as a from Movie
+            Parsed query: {'select': {'value': {'max': 'Name'}, 'name': 'a'}, 'from': 'Movie'}
+            '''
             if isinstance(attr['value'], dict):
                 sql_aggr = next(iter(attr['value']))
                 cur_column.aggregation = sql_aggr
@@ -104,16 +111,28 @@ def get_select_columns(select_query):
         else:
             raise SQLVerifyException("Invalid query")
 
-    return select_columns, select_all_present
+    if select_all_present:
+        for alias, table in alias_table_map.items():
+            for _, row in schema.iterrows():  
+                relation = row['RelationName']
+                attr = row['AttributeName']  
+
+                if table == relation:
+                    cur_column = DataStructures.Column(name=attr, table=alias, alias=alias)
+                    cur_column.aggregation = "none"
+                    select_columns.append(cur_column)     
 
 
-def verify_select_columns(select_columns, select_all_present, alias_table_map, schema):
+    return select_columns
+
+
+def verify_select_columns(select_columns, alias_table_map, schema):
     for i, col in enumerate(select_columns):
         col_table = None
         col_alias = None
 
         if col.table is None:
-            for j, row in schema.iterrows():
+            for _, row in schema.iterrows():
                 relation = row['RelationName']
                 attr = row['AttributeName']
       

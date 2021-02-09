@@ -11,5 +11,5 @@ class Column:
         if alias is None:
             self.alias = self.name
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         return f"{self.name}, {self.table}, {self.alias}, {self.aggregation}"
