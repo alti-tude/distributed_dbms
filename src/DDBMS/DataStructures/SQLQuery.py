@@ -1,12 +1,12 @@
 from DDBMS.DataStructures.Table import Table
 from typing import Dict, List
-from DDBMS.Parser import parseSql
+from DDBMS.Parser import parse_sql
 from .Predicate import Predicate, getPredicateObj
 from .Symbols import Keywords, PredicateOps
 
 class SQLQuery:
     def __init__(self, *, query_string: str) -> None:
-        self.parsed_query = parseSql(query_string)
+        self.parsed_query = parse_sql(query_string)
         
         self.select = None
         self.from_clause = []

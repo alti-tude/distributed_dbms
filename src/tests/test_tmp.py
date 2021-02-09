@@ -18,7 +18,7 @@ def test_joinLeaves(mocker):
                 {'eq': [Column(name="c", table=Table(name="t2")), Column(name="b", table=Table(name="t3"))]},
             ]}
         }
-    with mocker.patch.object(DDBMS.DataStructures.SQLQuery, 'parseSql', return_value = sql):
+    with mocker.patch.object(DDBMS.DataStructures.SQLQuery, 'parse_sql', return_value = sql):
         tmp = SQLQuery(query_string= "whatever")
         builder = RATreeBuilder(tmp)
         
