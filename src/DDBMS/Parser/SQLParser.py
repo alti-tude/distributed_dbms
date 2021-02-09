@@ -2,7 +2,7 @@ import moz_sql_parser
 from DDBMS.DB import db 
 from DDBMS.Exceptions import *
 
-def parse_sql(query):
+def parseSql(query):
     query = query.replace('"', "'")
     try:
         return moz_sql_parser.parse(query)

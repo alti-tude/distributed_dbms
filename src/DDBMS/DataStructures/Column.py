@@ -1,8 +1,8 @@
-from DDBMS.DataStructures.Aggregation import Aggregation
 from DDBMS.DataStructures.Table import Table
+from DDBMS.DataStructures.Symbols import Aggregation
 
 class Column:
-    def __init__(self, *, name, table, alias = None, aggregation = Aggregation.NONE) -> None:
+    def __init__(self, *, name : str, table : Table, alias = None, aggregation = Aggregation.NONE) -> None:
         self.name = name
         self.table = table
         self.alias = alias
@@ -10,3 +10,6 @@ class Column:
 
         if alias is None:
             self.alias = self.name
+
+    def __str__(self) -> str:
+        return f"{self.name}, {self.table}, {self.alias}, {self.aggregation}"
