@@ -1,9 +1,8 @@
-from DDBMS.Parser.SQLParser import SQLParser
+from DDBMS.Parser.SQLParser import *
 
 if __name__ == '__main__':
     query = input()
 
-    parser = SQLParser()
-    parsed_query = parser.sql_parse(query)
+    parsed_query = parse_sql(query)
     print(parsed_query)
         
