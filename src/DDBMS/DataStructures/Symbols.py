@@ -1,6 +1,6 @@
 class Aggregation:
-    NONE = 0
-    MAX = 1
+    NONE = "none"
+    MAX = "max"
 
 class PredicateOps:
     AND = "and"

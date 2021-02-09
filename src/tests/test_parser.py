@@ -14,7 +14,7 @@ def test_getPredicateObj():
     })
 
     target = """
-        and, ["gt, ['id, t1, id, 0', '3']", "eq, ['a, t1, a, 0', 'b, t2, b, 0']", "eq, ['c, t1, c, 0', 'b, t2, b, 0']"]
+        and, ["gt, [\'id, t1, t1, id, none\', \'3\']", "eq, [\'a, t1, t1, a, none\', \'b, t2, t2, b, none\']", "eq, [\'c, t1, t1, c, none\', \'b, t2, t2, b, none\']"]
     """.strip()
 
     assert str(predicate) == target

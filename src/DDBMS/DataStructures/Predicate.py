@@ -9,7 +9,7 @@ class Predicate:
         return f"{self.op}, {[str(operand) for operand in self.operands]}"
 
 def getPredicateObj(parsed_predicate : Dict) -> Predicate:
-    operator = list(parsed_predicate.keys())[0]
+    operator = next(iter(parsed_predicate))
     operands = []
     for parsed_operand in parsed_predicate[operator]:
         if isinstance(parsed_operand, dict):
