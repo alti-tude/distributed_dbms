@@ -1,9 +1,8 @@
 import argparse
-import mysql.connector
-
+from DDBMS.DB import DB
 
 LOCAL_CONFIG = {
-    "user": "ddbms",
+    "user": "ddbms2",
     "password": "ddbms",
     "host": "localhost",
     "database": "ddbms"
@@ -17,33 +16,7 @@ SERVER_CONFIG = {
     "auth_plugin": "mysql_native_password"
 }
 
-class DB:
-    def __init__(self, *, user = "Samosa", password = "Samose", host = "127.0.0.1", database = "Samose"):
-        self.config = {
-            "user": user,
-            "password": password,
-            "host": host,
-            "database": database
-        }
-
-    def execute(self, query_function):
-        def wrapper(*args, **kwargs):
-            conn = mysql.connector.connect(**self.config)
-            cur = conn.cursor()
-            
-            query = query_function(*args, **kwargs)
-            assert(isinstance(query,str))
-
-            cur.execute(query)
-            result = [item for item in cur]
-
-            cur.close()
-            conn.close()
-
-            return result
-        
-        return wrapper
-db = DB()
+db = DB(config=LOCAL_CONFIG)
 
 @db.execute
 def getFragments(relation_name):
