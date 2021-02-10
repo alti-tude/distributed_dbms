@@ -41,15 +41,12 @@ def verify(query):
     select_columns = get_select_columns(query['select'], 
                                         alias_table_map,
                                         schema[['RelationName', 'AttributeName']]) 
-    # print(select_columns, select_all_present)
 
-    print(select_columns)
     select_columns = verify_select_columns(select_columns,
                                            alias_table_map,
                                            schema[['RelationName', 'AttributeName']])
 
     print(select_columns)
-    # Do select_all_present logic
 
 
 def get_from_tables(application_relations, from_query):
