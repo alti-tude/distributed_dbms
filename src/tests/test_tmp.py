@@ -34,5 +34,4 @@ def test_joinLeaves(mocker):
         tmp = SQLQuery(query_string= "whatever")
         builder = RATreeBuilder(tmp)
 
-    print(builder.selected, file=sys.stderr)    
     assert 1==1

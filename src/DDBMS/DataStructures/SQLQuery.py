@@ -10,10 +10,10 @@ class SQLQuery:
     def __init__(self, *, query_string: str) -> None:
         self.parsed_query = parse_sql(query_string)
         
-        self.select = None
+        self.select = []
         self.from_clause = []
         self.where = None
-        self.groupby = None
+        self.groupby = []
         self.having = None
 
         if Keywords.SELECT in self.parsed_query:
@@ -52,7 +52,7 @@ class SQLQuery:
 
     def filterHavingPredicates(self, filter_fn = lambda x: True) -> List[Predicate]:
         return self.__filterPredicates(filter_fn, self.having)
-        
+
     def __filterPredicates(self, filter_fn, predicates):
         if predicates is None:
             return []
@@ -77,4 +77,5 @@ class SQLQuery:
     def getAllCols(self) -> List[Column]:
         return Column.AllColumns
 
-        
+    def getSelectCols(self) -> List[Column]:
+        return self.select

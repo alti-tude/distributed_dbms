@@ -18,10 +18,12 @@ class RATreeBuilder:
             if self.where_pred_alive[idx]: live_preds.append(pred)
         self.selected = self.seperateSelect(live_preds, self.joined)
 
-        self.gamma_added = self.addGamma(self.selected)
+        self.gamma_added = self.addGroupby(self.selected)
 
         live_preds = [predicate for (idx,predicate) in self.sql_query.filterHavingPredicates()]
         self.having_added = self.seperateSelect(live_preds, self.gamma_added)
+        
+        self.projected = self.addProject(self.having_added)
 
     def buildTablesAsLeaves(self) -> List[Table]:
         return [table for table in self.sql_query.getTables()]
@@ -88,10 +90,19 @@ class RATreeBuilder:
         
         return cur_node
     
-    def addGamma(self, cur_root):
+    def addGroupby(self, cur_root):
         cur_node = cur_root
 
         group_by_cols = self.sql_query.getGroupByCols()
         aggregations = [col for col in self.sql_query.getAllCols() if col.aggregation != Aggregation.NONE]
+        
+        if len(group_by_cols) > 0:
+            return GroupbyNode(group_by_columns=group_by_cols, aggregations=aggregations, children=[cur_node])
+        return cur_node
 
-        return GroupbyNode(group_by_columns=group_by_cols, aggregations=aggregations, children=[cur_node])
+    def addProject(self, cur_root):
+        cur_node = cur_root
+
+        project_cols = self.sql_query.getSelectCols()
+
+        return ProjectNode(columns=project_cols, children=[cur_node])
