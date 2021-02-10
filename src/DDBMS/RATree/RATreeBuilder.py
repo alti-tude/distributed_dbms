@@ -1,4 +1,4 @@
-from DDBMS.DataStructures.Symbols import PredicateOps
+from DDBMS.DataStructures.Symbols import Aggregation, PredicateOps
 from DDBMS.DataStructures.Predicate import Predicate
 from DDBMS.DataStructures.SQLQuery import SQLQuery
 from .Nodes import *
@@ -16,7 +16,12 @@ class RATreeBuilder:
         live_preds = []
         for (idx, pred) in self.sql_query.filterWherePredicates():
             if self.where_pred_alive[idx]: live_preds.append(pred)
-        self.selected = self.seperateSelect(live_preds)
+        self.selected = self.seperateSelect(live_preds, self.joined)
+
+        self.gamma_added = self.addGamma(self.selected)
+
+        live_preds = [predicate for (idx,predicate) in self.sql_query.filterHavingPredicates()]
+        self.having_added = self.seperateSelect(live_preds, self.gamma_added)
 
     def buildTablesAsLeaves(self) -> List[Table]:
         return [table for table in self.sql_query.getTables()]
@@ -75,10 +80,18 @@ class RATreeBuilder:
         else:
             return CrossNode(children=to_cross)
 
-    def seperateSelect(self, live_preds):
-        cur_node = self.joined
+    def seperateSelect(self, live_preds, cur_root):
+        cur_node = cur_root
 
         for predicate in live_preds:
             cur_node = SelectNode(predicate=predicate, children=[cur_node])
         
-        return cur_node        
+        return cur_node
+    
+    def addGamma(self, cur_root):
+        cur_node = cur_root
+
+        group_by_cols = self.sql_query.getGroupByCols()
+        aggregations = [col for col in self.sql_query.getAllCols() if col.aggregation != Aggregation.NONE]
+
+        return GroupbyNode(group_by_columns=group_by_cols, aggregations=aggregations, children=[cur_node])

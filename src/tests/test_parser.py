@@ -1,11 +1,11 @@
 from DDBMS.DataStructures.SQLQuery import SQLQuery
 from DDBMS.DataStructures import Column, Table
-from DDBMS.DataStructures.Predicate import getPredicateObj
+from DDBMS.DataStructures.Predicate import buildPredicateTree
 from DDBMS.RATree.RATreeBuilder import RATreeBuilder
 import DDBMS
 def test_getPredicateObj():
 
-    predicate = getPredicateObj({
+    predicate = buildPredicateTree({
         'and': [
             {'gt': [Column(name="id", table=Table(name="t1")), 3]},
             {'eq': [Column(name="a", table=Table(name="t1")), Column(name="b", table=Table(name="t2"))]},

@@ -1,3 +1,6 @@
+import json
+
+
 class Table:
     def __init__(self, *, name, alias = None) -> None:
         self.name = name
@@ -6,5 +9,12 @@ class Table:
         if alias is None:
             self.alias = self.name
 
-    def __str__(self):
-        return f"{self.name}, {self.alias}"
+    def __repr__(self):
+        output = {
+            'Table': {
+                'name': str(self.name), 
+                'alias': str(self.alias)
+            }
+        }
+
+        return json.dumps(output)
