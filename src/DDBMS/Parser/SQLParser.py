@@ -83,10 +83,30 @@ def get_select_columns(select_query, alias_table_map, schema):
     select_attrs = [select_query] if not isinstance(select_query, list) else select_query
     
     for attr in select_attrs:
-        cur_column = DataStructures.Column(name=None, table=None)
+        select_all_present = False
+        select_all_aggr = "none"
+
+        # Check if select * or select max(*) etc present
         if attr == '*':
             select_all_present = True
+        elif isinstance(attr, dict) and isinstance(attr['value'], dict):
+            sql_aggr = next(iter(attr['value']))
+            if attr['value'][sql_aggr] == '*':
+                select_all_present = True
+                select_all_aggr = sql_aggr
+
+        if select_all_present:       
+            for alias, table in alias_table_map.items():
+                for _, row in schema.iterrows():  
+                    relation = row['RelationName']
+                    attr = row['AttributeName']  
+
+                    if table == relation:
+                        cur_column = DataStructures.Column(name=attr, table=alias, alias=alias)
+                        cur_column.aggregation = select_all_aggr
+                        select_columns.append(cur_column)    
         elif isinstance(attr, dict):
+            cur_column = DataStructures.Column(name=None, table=None)
             cur_column.name = attr['value']
             
             '''
@@ -110,18 +130,6 @@ def get_select_columns(select_query, alias_table_map, schema):
             select_columns.append(cur_column)
         else:
             raise SQLVerifyException("Invalid query")
-
-    if select_all_present:
-        for alias, table in alias_table_map.items():
-            for _, row in schema.iterrows():  
-                relation = row['RelationName']
-                attr = row['AttributeName']  
-
-                if table == relation:
-                    cur_column = DataStructures.Column(name=attr, table=alias, alias=alias)
-                    cur_column.aggregation = "none"
-                    select_columns.append(cur_column)     
-
 
     return select_columns
 
