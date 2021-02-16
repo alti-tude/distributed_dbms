@@ -51,18 +51,15 @@ class ProjectNode(Node):
         }
         return json.dumps(output)
 
-#TODO remove aggregations
 class GroupbyNode(Node):
     def __init__(self, *, group_by_columns : List[Column], aggregations : List[Column], children = []) -> None:
         super().__init__(children=children)
         self.group_by_columns = group_by_columns
-        self.aggregations = aggregations
 
     def __repr__(self) -> str:
         output = {
             'Groupby':{
                 'group_by_columns': json.loads(str(self.group_by_columns)),
-                'aggs': json.loads(str(self.aggregations)),
                 'children': json.loads(str(self.children))
             }
         }
