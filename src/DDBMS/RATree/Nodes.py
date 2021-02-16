@@ -1,7 +1,7 @@
 import json
 from typing import List
-from DDBMS.DataStructures.Column import Column
-from DDBMS.DataStructures.Table import Table
+from DDBMS.Parser.SQLQuery.Column import Column
+from DDBMS.Parser.SQLQuery.Table import Table
 from abc import ABC, abstractmethod
 
 class Node(ABC):
@@ -51,6 +51,7 @@ class ProjectNode(Node):
         }
         return json.dumps(output)
 
+#TODO remove aggregations
 class GroupbyNode(Node):
     def __init__(self, *, group_by_columns : List[Column], aggregations : List[Column], children = []) -> None:
         super().__init__(children=children)

@@ -2,7 +2,7 @@ import json
 
 
 class Table:
-    def __init__(self, *, name, alias = None) -> None:
+    def __init__(self, name, alias = None) -> None:
         self.name = name
         self.alias = alias
         
