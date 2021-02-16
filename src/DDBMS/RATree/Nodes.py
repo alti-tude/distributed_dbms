@@ -81,7 +81,7 @@ class UnionNode(Node):
         return json.dumps(output)
 
 class JoinNode(Node):
-    def __init__(self, *, join_predicate, children = []) -> None:
+    def __init__(self, join_predicate, children = []) -> None:
         super().__init__(children=children)
         self.join_predicate = join_predicate
 
@@ -107,7 +107,7 @@ class CrossNode(Node):
         return json.dumps(output)
 
 class RelationNode(Node):
-    def __init__(self, *, table : Table) -> None:
+    def __init__(self, table : Table) -> None:
         super().__init__(children=[])
         self.table = table
 
@@ -119,3 +119,9 @@ class RelationNode(Node):
             }
         }
         return json.dumps(output)
+
+    def __eq__(self, o: object) -> bool:
+        if isinstance(o, Table):
+            return self.table == o
+        
+        return super().__eq__(o)

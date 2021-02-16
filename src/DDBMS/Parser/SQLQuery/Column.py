@@ -23,3 +23,6 @@ class Column:
         }
             
         return json.dumps(output)
+
+    def __eq__(self, o: object) -> bool:
+        return repr(self) == repr(o)
