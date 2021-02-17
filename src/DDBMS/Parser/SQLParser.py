@@ -46,12 +46,34 @@ class SQLParser:
         for table in self.formatted_query.tables:
             for _, row in self.schema.iterrows():
                 relation = row['RelationName']
-                attr = row['AttributeName']  
+                attr = row['AttributeName']
 
                 if table.name == relation:
                     self.formatted_query.addSelectColumn(attr, table, aggregation=aggr)
 
+
+    def mapColToTable(self, col_name, table_alias=None):
+        for table in self.formatted_query.tables:
+            if table_alias is not None and table_alias != table.alias:
+                continue
+
+            for _, row in self.schema.iterrows():
+                relation = row['RelationName']
+                attr = row['AttributeName']  
+
+                if table.name == relation and col_name == attr:
+                    return table
+
     
+    def parseSelectColumn(self, col_name):
+        col_details = col_name.split('.')
+
+        if len(col_details) == 1:
+            return self.mapColToTable(col_details[0]), col_details[0]
+        else:
+            return self.mapColToTable(col_details[1], col_details[0]), col_details[1] 
+
+
     def addSelectColumns(self, query):
         select_query = query['select']
         select_cols = [select_query] if not isinstance(select_query, list) else select_query
@@ -74,6 +96,17 @@ class SQLParser:
 
             if select_all_present:
                 self.addAllSelectColumns(select_all_aggr)
+            else:
+                col_name = col['value']
+                col_aggr = Aggregation.NONE
+                col_alias = None
 
+                if isinstance(col['value'], dict):
+                    col_aggr = next(iter(attr['value']))
+                    col_name = col['value'][col_aggr]
+                if 'name' in col:
+                    col_alias = col['name']
 
+            col_table, col_name = self.parseSelectColumn(col_name)
+            self.formatted_query.addSelectColumn(col_name, col_table, col_alias, col_aggr)
 
