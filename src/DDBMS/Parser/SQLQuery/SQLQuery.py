@@ -1,5 +1,5 @@
 from typing import List
-from DDBMS.Parser.SQLQuery.Predicate import Predicate
+from .Predicate import Predicate
 from .Column import Column
 from .Table import Table
 from .Symbols import *

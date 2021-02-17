@@ -19,7 +19,7 @@
 from DDBMS.Parser.SQLParser import *
 
 query = input()
-query = parse_sql(query)
+query = parseSQL(query)
 print(query)
 
-verify(query)
+formatParsedQuery(query)
