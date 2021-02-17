@@ -122,6 +122,10 @@ class SQLQuery:
 
         return mask            
 
+    def __orderJoinPredicates(self):
+        #TODO order self.join
+        pass
+
     def buildJoin(self):
         if self.join is not None:
             return self.join
@@ -131,6 +135,7 @@ class SQLQuery:
 
         where_copy = self.where
         self.join = [where_copy[idx] for idx in range(len(mask)) if mask[idx]]
+        self.__orderJoinPredicates()
         self.where = [where_copy[idx] for idx in range(len(mask)) if not mask[idx]]
 
         return self.join
