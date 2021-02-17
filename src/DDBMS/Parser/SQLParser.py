@@ -107,6 +107,5 @@ class SQLParser:
                 if 'name' in col:
                     col_alias = col['name']
 
-            col_table, col_name = self.parseSelectColumn(col_name)
-            self.formatted_query.addSelectColumn(col_name, col_table, col_alias, col_aggr)
-
+                col_table, col_name = self.parseSelectColumn(col_name)
+                self.formatted_query.addSelectColumn(col_name, col_table, col_alias, col_aggr)

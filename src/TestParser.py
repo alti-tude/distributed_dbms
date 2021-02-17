@@ -20,4 +20,8 @@ from DDBMS.Parser.SQLParser import *
 
 query = input()
 parser = SQLParser()
-parser.parse(query)
+
+try:
+    parser.parse(query)
+except:
+    print("Error in query")
