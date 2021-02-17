@@ -19,7 +19,5 @@
 from DDBMS.Parser.SQLParser import *
 
 query = input()
-query = parseSQL(query)
-print(query)
-
-formatParsedQuery(query)
+parser = SQLParser()
+parser.parse(query)

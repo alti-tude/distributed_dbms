@@ -1,1 +1,1 @@
-from .SQLParser import parseSQL
+from .SQLParser import SQLParser

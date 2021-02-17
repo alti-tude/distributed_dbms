@@ -1,24 +1,34 @@
 import moz_sql_parser
 from DDBMS.Parser.SQLQuery import *
 
-def parseSQL(query):
-    query = query.replace('"', "'")
-    return moz_sql_parser.parse(query)
+class SQLParser:
+    def __init__(self):
+        self.formatted_query = SQLQuery()
+
+    def reset(self):
+        self.formatted_query.reset()
 
 
-def formatParsedQuery(query):
-    formatted_query = SQLQuery()
-    addFromTables(query, formatted_query)
-    print(formatted_query.tables)
+    def parse(self, original_query):
+        query = original_query.replace('"', "'")
+        query = moz_sql_parser.parse(query)
+
+        self.addFromTables(query)
+        print(self.formatted_query.tables)
+
+        self.reset()
 
 
-def addFromTables(query, formatted_query):
-    from_query = query['from']
-    from_tables = [from_query] if not isinstance(from_query, list) else from_query
+    def addFromTables(self, query):
+        from_query = query['from']
+        from_tables = [from_query] if not isinstance(from_query, list) else from_query
 
-    for table in from_tables:
-        if isinstance(table, dict):
-            formatted_query.addFrom(Table(table['value'], table['name']))
-        else:
-            formatted_query.addFrom(Table(table))
+        for table in from_tables:
+            if isinstance(table, dict):
+                self.formatted_query.addFrom(Table(table['value'], table['name']))
+            else:
+                self.formatted_query.addFrom(Table(table))
+
+    
+
 
