@@ -17,13 +17,15 @@ class SQLParser:
     def parse(self, original_query):
         query = original_query.replace('"', "'")
         query = moz_sql_parser.parse(query)
-        print(query)
 
         self.addFromTables(query)
-        print(self.formatted_query.tables)
-
         self.addSelectColumns(query)
+        self.addGroupbyColumns(query)
+
+        print(query)
+        print(self.formatted_query.tables)
         print(self.formatted_query.select)
+        print(self.formatted_query.groupby)
 
         self.reset()
         return self.formatted_query
@@ -65,7 +67,7 @@ class SQLParser:
                     return table
 
     
-    def parseSelectColumn(self, col_name):
+    def parseColumn(self, col_name):
         col_details = col_name.split('.')
 
         if len(col_details) == 1:
@@ -107,5 +109,14 @@ class SQLParser:
                 if 'name' in col:
                     col_alias = col['name']
 
-                col_table, col_name = self.parseSelectColumn(col_name)
+                col_table, col_name = self.parseColumn(col_name)
                 self.formatted_query.addSelectColumn(col_name, col_table, col_alias, col_aggr)
+
+
+    def addGroupbyColumns(self, query):
+        groupby_query = query['groupby']
+        groupby_cols = [groupby_query] if not isinstance(groupby_query, list) else groupby_query
+
+        for col in groupby_cols:
+            col_table, col_name = self.parseColumn(col['value'])
+            self.formatted_query.addGroupbyColumn(col_name, col_table)
