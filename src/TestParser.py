@@ -21,7 +21,7 @@ from DDBMS.Parser.SQLParser import *
 query = input()
 parser = SQLParser()
 
-try:
-    parser.parse(query)
-except:
-    print("Error in query")
+# try:
+parser.parse(query)
+# except:
+#     print("Error in query")

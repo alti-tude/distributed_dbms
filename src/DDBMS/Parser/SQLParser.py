@@ -1,3 +1,4 @@
+import copy
 import moz_sql_parser
 from DDBMS.DB import db
 from DDBMS.Parser.SQLQuery import *
@@ -18,22 +19,35 @@ class SQLParser:
         query = original_query.replace('"', "'")
         query = moz_sql_parser.parse(query)
 
-        self.addFromTables(query)
-        self.addSelectColumns(query)
-        self.addGroupbyColumns(query)
+        self.addFromTables(query['from'])
+        self.addSelectColumns(query['select'])
 
-        print(query)
-        print(self.formatted_query.tables)
-        print(self.formatted_query.select)
-        print(self.formatted_query.groupby)
+        if 'groupby' in query:
+            self.addGroupbyColumns(query['groupby'])
 
+        if 'where' in query:
+            predicate = self.parsePredicate(query['where'])
+            # print(predicate)
+            self.formatted_query.addWherePredicate(predicate)
+
+        if 'having' in query:
+            predicate = self.parsePredicate(query['having'])
+            self.formatted_query.addHavingPredicate(predicate)
+
+        # print(query)
+        # print(self.formatted_query.select)
+        # print(self.formatted_query.tables)
+        # print(self.formatted_query.where)
+        # print(self.formatted_query.groupby)
+        # print(self.formatted_query.having)
+
+        final_format = copy.deepcopy(self.formatted_query)
         self.reset()
-        return self.formatted_query
+        return final_format
 
 
-    def addFromTables(self, query):
-        from_query = query['from']
-        from_tables = [from_query] if not isinstance(from_query, list) else from_query
+    def addFromTables(self, clause):
+        from_tables = [clause] if not isinstance(clause, list) else clause
 
         for table in from_tables:
             cur_table = None
@@ -76,9 +90,8 @@ class SQLParser:
             return self.mapColToTable(col_details[1], col_details[0]), col_details[1] 
 
 
-    def addSelectColumns(self, query):
-        select_query = query['select']
-        select_cols = [select_query] if not isinstance(select_query, list) else select_query
+    def addSelectColumns(self, clause):
+        select_cols = [clause] if not isinstance(clause, list) else clause
 
         for col in select_cols:
             select_all_present = True if col == '*' else False
@@ -113,10 +126,43 @@ class SQLParser:
                 self.formatted_query.addSelectColumn(col_name, col_table, col_alias, col_aggr)
 
 
-    def addGroupbyColumns(self, query):
-        groupby_query = query['groupby']
-        groupby_cols = [groupby_query] if not isinstance(groupby_query, list) else groupby_query
+    def addGroupbyColumns(self, clause):
+        groupby_cols = [clause] if not isinstance(clause, list) else clause
 
         for col in groupby_cols:
             col_table, col_name = self.parseColumn(col['value'])
             self.formatted_query.addGroupbyColumn(col_name, col_table)
+
+    
+    def parsePredicateCondition(self, predicate, predicate_key):
+        for i, val in enumerate(predicate[predicate_key]):
+            if isinstance(val, str):
+                col_table, col_name = self.parseColumn(val)
+                predicate[predicate_key][i] = Column(col_name, col_table)
+            elif isinstance(val, dict):
+                col_aggr = next(iter(val))
+                if col_aggr != 'literal':
+                    col_table, col_name = self.parseColumn(val[col_aggr])
+                    predicate[predicate_key][i] = Column(col_name, col_table, aggregation=col_aggr)
+                else:
+                    predicate[predicate_key][i] = val[col_aggr]
+
+
+    def parsePredicate(self, clause):
+        predicate = copy.deepcopy(clause)
+        predicate_key = next(iter(predicate))
+
+        if predicate_key != 'and':
+            self.parsePredicateCondition(predicate, predicate_key)
+        else:
+            for andpredicate in predicate['and']:
+                andpredicate_key = next(iter(andpredicate))
+
+                if andpredicate_key != 'or':
+                    self.parsePredicateCondition(andpredicate, andpredicate_key)
+                else:
+                    for orpredicate in andpredicate['or']:
+                        orpredicate_key = next(iter(orpredicate))
+                        self.parsePredicateCondition(orpredicate, orpredicate_key)
+        
+        return predicate
