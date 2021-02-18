@@ -9,12 +9,12 @@ class Predicate:
     def __repr__(self):
         output = {
             'Predicate': {
-                'operator': str(self.op), 
-                'operands': json.loads(str(self.operands))
+                'operator': str(self.operator), 
+                'operands': self.operands
             }
         }
 
-        return json.dumps(output)
+        return str(output)
 
     def __eq__(self, o: object) -> bool:
         return repr(self) == repr(o)

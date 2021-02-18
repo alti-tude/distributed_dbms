@@ -27,7 +27,7 @@ class SQLParser:
 
         if 'where' in query:
             predicate = self.parsePredicate(query['where'])
-            # print(predicate)
+            print(predicate)
             self.formatted_query.addWherePredicate(predicate)
 
         if 'having' in query:

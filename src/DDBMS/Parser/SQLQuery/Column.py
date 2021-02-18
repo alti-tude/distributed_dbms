@@ -16,13 +16,13 @@ class Column:
         output = {
             'Column': {
                 'name': str(self.name), 
-                'table': json.loads(str(self.table)), 
+                'table': str(self.table), 
                 'alias': str(self.alias), 
                 'agg': str(self.aggregation)
             }
         }
             
-        return json.dumps(output)
+        return str(output)
 
     def __eq__(self, o: object) -> bool:
         return repr(self) == repr(o)
