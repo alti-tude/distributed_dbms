@@ -15,7 +15,6 @@ class SQLQuery:
 
         self.select = []
         self.where = None
-        self.join = None
         self.groupby = []
         self.having = None
 
@@ -84,3 +83,16 @@ class SQLQuery:
         return new_predicate
     
 
+    def __repr__(self) -> str:
+        output = {
+            "columns" : str(self.columns),
+            "tables" : str(self.tables),
+            "predicates" : str(self.predicates),
+
+            "select" : str(self.select),
+            "where" : str(self.where),
+            "groupby" : str(self.groupby),
+            "having" : str(self.having)
+        }
+
+        return str(output)

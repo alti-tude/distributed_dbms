@@ -18,4 +18,3 @@ def test_getPredicateObj():
 
     assert str(predicate) == target
 
-
