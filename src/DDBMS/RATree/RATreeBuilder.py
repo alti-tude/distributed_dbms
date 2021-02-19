@@ -12,7 +12,7 @@ class RATreeBuilder:
         self.where_pred_alive = [True for i in self.sql_query.filterWherePredicates()]
 
         self.leaves = self.buildTablesAsLeaves()
-        self.joined = self.joinLeaves()
+        self.joined = self.crossTables()
         self.selected = self.seperateSelect(self.sql_query.where, self.joined)
         self.gamma_added = self.addGroupby(self.selected)
         self.having_added = self.seperateSelect(self.sql_query.having, self.gamma_added)
@@ -21,38 +21,12 @@ class RATreeBuilder:
     def buildTablesAsLeaves(self) -> List[RelationNode]:
         return [RelationNode(table) for table in self.sql_query.tables]
 
-    def joinLeaves(self):
-        self.sql_query.buildJoin()
+    def crossTables(self):
+        cur_node = self.leaves[0]
+        for i in range(1, len(self.leaves)):
+            cur_node = CrossNode(children=[cur_node, self.leaves[i]])
         
-        cur_table = self.sql_query.join[0].operands[0].table
-        cur_node = self.leaves[self.leaves.index(cur_table)]
-
-        joined_table_mask = [False for i in self.leaves]
-        joined_table_mask[self.leaves.index(cur_table)] = True
-        to_cross = []
-
-        for predicate in self.sql_query.join:
-            if predicate.operands[0].table == cur_table:
-                cur_table = predicate.operands[1].table
-                next_node = self.leaves[self.leaves.index(cur_table)]
-                cur_node = JoinNode(predicate, children=[cur_node, next_node])
-            else:
-                to_cross.append(cur_node)
-                cur_table = predicate.operands[0].table
-                cur_node = self.leaves[self.leaves.index(cur_table)]
-    
-            joined_table_mask[self.leaves.index(cur_table)] = True
-
-        to_cross.append(cur_node)
-
-        for i in range(len(self.leaves)):
-            if not joined_table_mask[i]:
-                to_cross.append(self.leaves[i])
-        
-        if len(to_cross) == 1:
-            return to_cross[0]
-        else:
-            return CrossNode(children=to_cross)
+        return cur_node
 
     def seperateSelect(self, predicates, cur_root):
         cur_node = cur_root

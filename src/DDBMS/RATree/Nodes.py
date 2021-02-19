@@ -16,11 +16,11 @@ class Node(ABC):
     def __repr__(self) -> str:
         output = {
             'Node': {
-                'children': json.loads(str(self.children))
+                'children': str(self.children)
             }
         }
 
-        return json.dumps(output)
+        return str(output)
         
 
 class SelectNode(Node):
@@ -31,11 +31,11 @@ class SelectNode(Node):
     def __repr__(self) -> str:
         output = {
             'Select':{
-                'predicate': json.loads(str(self.predicate)),
-                'children': json.loads(str(self.children))
+                'predicate': str(self.predicate),
+                'children': str(self.children)
             }
         }
-        return json.dumps(output)
+        return str(output)
 
 class ProjectNode(Node):
     def __init__(self, *, columns : List[Column], children=[]) -> None:
@@ -45,11 +45,11 @@ class ProjectNode(Node):
     def __repr__(self) -> str:
         output = {
             'Project':{
-                'columns': json.loads(str(self.columns)),
-                'children': json.loads(str(self.children))
+                'columns': str(self.columns),
+                'children': str(self.children)
             }
         }
-        return json.dumps(output)
+        return str(output)
 
 class GroupbyNode(Node):
     def __init__(self, *, group_by_columns : List[Column], aggregations : List[Column], children = []) -> None:
@@ -59,11 +59,11 @@ class GroupbyNode(Node):
     def __repr__(self) -> str:
         output = {
             'Groupby':{
-                'group_by_columns': json.loads(str(self.group_by_columns)),
-                'children': json.loads(str(self.children))
+                'group_by_columns': str(self.group_by_columns),
+                'children': str(self.children)
             }
         }
-        return json.dumps(output)
+        return str(output)
 
 class UnionNode(Node):
     def __init__(self, *, children = []) -> None:
@@ -72,10 +72,10 @@ class UnionNode(Node):
     def __repr__(self) -> str:
         output = {
             'Union':{
-                'children': json.loads(str(self.children))
+                'children': str(self.children)
             }
         }
-        return json.dumps(output)
+        return str(output)
 
 class JoinNode(Node):
     def __init__(self, join_predicate, children = []) -> None:
@@ -85,11 +85,11 @@ class JoinNode(Node):
     def __repr__(self) -> str:
         output = {
             'Union':{
-                'join_predicate': json.loads(str(self.join_predicate)),
-                'children': json.loads(str(self.children))
+                'join_predicate': str(self.join_predicate),
+                'children': str(self.children)
             }
         }
-        return json.dumps(output)
+        return str(output)
 
 class CrossNode(Node):
     def __init__(self, *, children = []) -> None:
@@ -98,10 +98,10 @@ class CrossNode(Node):
     def __repr__(self) -> str:
         output = {
             'Cross':{
-                'children': json.loads(str(self.children))
+                'children': str(self.children)
             }
         }
-        return json.dumps(output)
+        return str(output)
 
 class RelationNode(Node):
     def __init__(self, table : Table) -> None:
@@ -111,11 +111,11 @@ class RelationNode(Node):
     def __repr__(self) -> str:
         output = {
             'Relation':{
-                'table': json.loads(str(self.table)),
-                'children': json.loads(str(self.children))
+                'table': str(self.table),
+                'children': str(self.children)
             }
         }
-        return json.dumps(output)
+        return str(output)
 
     def __eq__(self, o: object) -> bool:
         if isinstance(o, Table):
