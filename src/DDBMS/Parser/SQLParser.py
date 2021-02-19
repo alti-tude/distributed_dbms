@@ -34,13 +34,6 @@ class SQLParser:
             predicate = self.parsePredicate(query['having'])
             self.formatted_query.addHavingPredicate(predicate)
 
-        # print(query)
-        # print(self.formatted_query.select)
-        # print(self.formatted_query.tables)
-        # print(self.formatted_query.where)
-        # print(self.formatted_query.groupby)
-        # print(self.formatted_query.having)
-
         final_format = copy.deepcopy(self.formatted_query)
         self.reset()
         return final_format

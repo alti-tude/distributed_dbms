@@ -17,11 +17,12 @@
 
 
 from DDBMS.Parser.SQLParser import *
+from DDBMS.RATree import RATreeBuilder
 
 query = input()
 parser = SQLParser()
+sql_query = parser.parse(query)
+# print(sql_query)
 
-# try:
-parser.parse(query)
-# except:
-#     print("Error in query")
+ra_tree = RATreeBuilder(sql_query)
+print(ra_tree)
