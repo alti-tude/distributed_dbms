@@ -85,13 +85,13 @@ class SQLQuery:
 
     def __repr__(self) -> str:
         output = {
-            "columns" : str(self.columns),
-            "tables" : str(self.tables),
-            "predicates" : str(self.predicates),
+            "columns" : self.columns,
+            "tables" : self.tables,
+            "predicates" : self.predicates,
 
-            "select" : str(self.select),
+            "select" : self.select,
             "where" : str(self.where),
-            "groupby" : str(self.groupby),
+            "groupby" : self.groupby,
             "having" : str(self.having)
         }
 
