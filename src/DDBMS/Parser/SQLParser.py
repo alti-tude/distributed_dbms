@@ -1,161 +1,161 @@
+import copy
 import moz_sql_parser
-from DDBMS.DB import db 
-from DDBMS.Exceptions import *
-import DDBMS.DataStructures as DataStructures
+from DDBMS.DB import db
+from DDBMS.Parser.SQLQuery import *
 
-def parse_sql(query):
-    query = query.replace('"', "'")
-    try:
-        return moz_sql_parser.parse(query)
-    except Exception as e:
-        raise SQLParserException(e)
+class SQLParser:
+    def __init__(self):
+        self.formatted_query = SQLQuery()
+        self.schema = self.getApplicationSchema()
 
+    def reset(self):
+        self.formatted_query = SQLQuery()
 
-@db.execute
-def get_schema():
-    return "SELECT * FROM Attribute;"
+    @db.execute
+    def getApplicationSchema(self):
+        return "SELECT * FROM Attribute;"
 
+    def parse(self, original_query):
+        query = original_query.replace('"', "'")
+        query = moz_sql_parser.parse(query)
 
-def parse_select_attribute(column_name):
-    column_details = column_name.split('.')
-    
-    if len(column_details) > 2:
-        raise SQLVerifyException("Invalid query")
-    elif len(column_details) == 1:
-        return None, column_details[0]
-    else:
-        return column_details[0], column_details[1]
+        self.addFromTables(query['from'])
+        self.addSelectColumns(query['select'])
 
+        if 'groupby' in query:
+            self.addGroupbyColumns(query['groupby'])
 
-# Write this recursively for each select
-def verify(query):
-    if 'from' not in query:
-        raise SQLVerifyException("No FROM clause found in query")
+        if 'where' in query:
+            predicate = self.parsePredicate(query['where'])
+            print(predicate)
+            self.formatted_query.addWherePredicate(predicate)
 
-    schema = get_schema()
-    application_relations = schema.RelationName.unique()
+        if 'having' in query:
+            predicate = self.parsePredicate(query['having'])
+            self.formatted_query.addHavingPredicate(predicate)
 
-    alias_table_map = get_from_tables(application_relations, query['from'])
-    print(alias_table_map)
-
-    select_columns = get_select_columns(query['select'], 
-                                        alias_table_map,
-                                        schema[['RelationName', 'AttributeName']]) 
-
-    select_columns = verify_select_columns(select_columns,
-                                           alias_table_map,
-                                           schema[['RelationName', 'AttributeName']])
-
-    print(select_columns)
+        final_format = copy.deepcopy(self.formatted_query)
+        self.reset()
+        return final_format
 
 
-def get_from_tables(application_relations, from_query):
-    from_tables = [from_query] if not isinstance(from_query, list) else from_query
-    table_alias = {} # Maps alias to actual name. Stores all tables
+    def addFromTables(self, clause):
+        from_tables = [clause] if not isinstance(clause, list) else clause
 
-    for table in from_tables:
-        relation_name = table
-        if (
-            isinstance(table, dict) and 
-            'name' in table and 
-            'value' in table and
-            (table['name'] not in table_alias)
-        ):
-            table_alias[table['name']] = table['value']
-            relation_name = table['value']
-        elif isinstance(table, str) and table not in table_alias:
-            table_alias[table] = table
-        else:
-            raise SQLVerifyException("Invalid query")
-
-        if relation_name not in application_relations:
-            raise SQLVerifyException("Invalid relation name", relation_name)
-    
-    return table_alias
-
-
-def get_select_columns(select_query, alias_table_map, schema):
-    select_all_present = False
-    select_columns = []
-    select_attrs = [select_query] if not isinstance(select_query, list) else select_query
-    
-    for attr in select_attrs:
-        select_all_present = False
-        select_all_aggr = "none"
-
-        # Check if select * or select max(*) etc present
-        if attr == '*':
-            select_all_present = True
-        elif isinstance(attr, dict) and isinstance(attr['value'], dict):
-            sql_aggr = next(iter(attr['value']))
-            if attr['value'][sql_aggr] == '*':
-                select_all_present = True
-                select_all_aggr = sql_aggr
-
-        if select_all_present:       
-            for alias, table in alias_table_map.items():
-                for _, row in schema.iterrows():  
-                    relation = row['RelationName']
-                    attr = row['AttributeName']  
-
-                    if table == relation:
-                        cur_column = DataStructures.Column(name=attr, table=alias, alias=alias)
-                        cur_column.aggregation = select_all_aggr
-                        select_columns.append(cur_column)    
-        elif isinstance(attr, dict):
-            cur_column = DataStructures.Column(name=None, table=None)
-            cur_column.name = attr['value']
-            
-            '''
-            Query: select max(Name) as a from Movie
-            Parsed query: {'select': {'value': {'max': 'Name'}, 'name': 'a'}, 'from': 'Movie'}
-            '''
-            if isinstance(attr['value'], dict):
-                sql_aggr = next(iter(attr['value']))
-                cur_column.aggregation = sql_aggr
-                cur_column.name = attr['value'][sql_aggr]
+        for table in from_tables:
+            cur_table = None
+            if isinstance(table, dict):
+                cur_table = Table(table['value'], table['name'])
             else:
-                cur_column.aggregation = "none"
-
-            if not isinstance(cur_column.name, str):
-                raise SQLVerifyException("Invalid query")
-
-            if 'name' in attr:
-                cur_column.alias = attr['name']
-
-            cur_column.table, cur_column.name = parse_select_attribute(cur_column.name)
-            select_columns.append(cur_column)
-        else:
-            raise SQLVerifyException("Invalid query")
-
-    return select_columns
+                cur_table = Table(table)
+            self.formatted_query.addFrom(cur_table)
 
 
-def verify_select_columns(select_columns, alias_table_map, schema):
-    for i, col in enumerate(select_columns):
-        col_table = None
-        col_alias = None
-
-        if col.table is None:
-            for _, row in schema.iterrows():
+    def addAllSelectColumns(self, aggr):
+        for table in self.formatted_query.tables:
+            for _, row in self.schema.iterrows():
                 relation = row['RelationName']
                 attr = row['AttributeName']
-      
-                if attr == col.name and relation in alias_table_map:
-                    if col_table is not None:
-                        raise SQLVerifyException("Column(s) belong to multiple tables")
-                    col_alias = relation
-                    col_table = alias_table_map[col_alias]
 
-        elif col.table in alias_table_map:
-            col_alias = col.table
-            col_table = alias_table_map[col_alias]
-
-        if col_table is None:
-            raise SQLVerifyException("Invalid column(s)")
-
-        select_columns[i].table = DataStructures.Table(name=col_table, alias=col_alias)
-
-    return select_columns
+                if table.name == relation:
+                    self.formatted_query.addSelectColumn(attr, table, aggregation=aggr)
 
 
+    def mapColToTable(self, col_name, table_alias=None):
+        for table in self.formatted_query.tables:
+            if table_alias is not None and table_alias != table.alias:
+                continue
+
+            for _, row in self.schema.iterrows():
+                relation = row['RelationName']
+                attr = row['AttributeName']  
+
+                if table.name == relation and col_name == attr:
+                    return table
+
+    
+    def parseColumn(self, col_name):
+        col_details = col_name.split('.')
+
+        if len(col_details) == 1:
+            return self.mapColToTable(col_details[0]), col_details[0]
+        else:
+            return self.mapColToTable(col_details[1], col_details[0]), col_details[1] 
+
+
+    def addSelectColumns(self, clause):
+        select_cols = [clause] if not isinstance(clause, list) else clause
+
+        for col in select_cols:
+            select_all_present = True if col == '*' else False
+            select_all_aggr = Aggregation.NONE
+
+            '''
+            TODO Need to think what to do if it is count(*)
+            Do we replace with all columns? What about aliasing being there?
+            e.g. select count(*) as total
+            '''
+            if isinstance(col, dict) and isinstance(col['value'], dict):
+                col_aggr = next(iter(col['value']))
+                if col['value'][col_aggr] == '*':
+                    select_all_present = True
+                    select_all_aggr = col_aggr
+            
+
+            if select_all_present:
+                self.addAllSelectColumns(select_all_aggr)
+            else:
+                col_name = col['value']
+                col_aggr = Aggregation.NONE
+                col_alias = None
+
+                if isinstance(col['value'], dict):
+                    col_aggr = next(iter(col['value']))
+                    col_name = col['value'][col_aggr]
+                if 'name' in col:
+                    col_alias = col['name']
+
+                col_table, col_name = self.parseColumn(col_name)
+                self.formatted_query.addSelectColumn(col_name, col_table, col_alias, col_aggr)
+
+
+    def addGroupbyColumns(self, clause):
+        groupby_cols = [clause] if not isinstance(clause, list) else clause
+
+        for col in groupby_cols:
+            col_table, col_name = self.parseColumn(col['value'])
+            self.formatted_query.addGroupbyColumn(col_name, col_table)
+
+    
+    def parsePredicateCondition(self, predicate, predicate_key):
+        for i, val in enumerate(predicate[predicate_key]):
+            if isinstance(val, str):
+                col_table, col_name = self.parseColumn(val)
+                predicate[predicate_key][i] = Column(col_name, col_table)
+            elif isinstance(val, dict):
+                col_aggr = next(iter(val))
+                if col_aggr != 'literal':
+                    col_table, col_name = self.parseColumn(val[col_aggr])
+                    predicate[predicate_key][i] = Column(col_name, col_table, aggregation=col_aggr)
+                else:
+                    predicate[predicate_key][i] = val[col_aggr]
+
+
+    def parsePredicate(self, clause):
+        predicate = copy.deepcopy(clause)
+        predicate_key = next(iter(predicate))
+
+        if predicate_key != 'and':
+            self.parsePredicateCondition(predicate, predicate_key)
+        else:
+            for andpredicate in predicate['and']:
+                andpredicate_key = next(iter(andpredicate))
+
+                if andpredicate_key != 'or':
+                    self.parsePredicateCondition(andpredicate, andpredicate_key)
+                else:
+                    for orpredicate in andpredicate['or']:
+                        orpredicate_key = next(iter(orpredicate))
+                        self.parsePredicateCondition(orpredicate, orpredicate_key)
+        
+        return predicate

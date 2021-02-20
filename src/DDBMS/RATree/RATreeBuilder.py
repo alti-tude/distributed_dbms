@@ -1,91 +1,41 @@
-from DDBMS.DataStructures.Symbols import Aggregation, PredicateOps
-from DDBMS.DataStructures.Predicate import Predicate
-from DDBMS.DataStructures.SQLQuery import SQLQuery
+
+from DDBMS.Parser.SQLQuery.Symbols import Aggregation, PredicateOps
+from DDBMS.Parser.SQLQuery.Predicate import Predicate
+from DDBMS.Parser.SQLQuery.SQLQuery import SQLQuery
 from .Nodes import *
 from copy import deepcopy
 
 class RATreeBuilder:
     def __init__(self, sql_query: SQLQuery):
-        self.sql_query = deepcopy(sql_query)
+        self.sql_query = sql_query
         
-        self.where_pred_alive = [True for i in self.sql_query.filterWherePredicates()]
-
         self.leaves = self.buildTablesAsLeaves()
-        self.joined = self.joinLeaves()
-
-        live_preds = []
-        for (idx, pred) in self.sql_query.filterWherePredicates():
-            if self.where_pred_alive[idx]: live_preds.append(pred)
-        self.selected = self.seperateSelect(live_preds, self.joined)
-
+        self.joined = self.crossTables()
+        self.selected = self.seperateSelect(self.sql_query.where, self.joined)
         self.gamma_added = self.addGroupby(self.selected)
-
-        live_preds = [predicate for (idx,predicate) in self.sql_query.filterHavingPredicates()]
-        self.having_added = self.seperateSelect(live_preds, self.gamma_added)
-        
+        self.having_added = self.seperateSelect(self.sql_query.having, self.gamma_added)
         self.projected = self.addProject(self.having_added)
 
-    def buildTablesAsLeaves(self) -> List[Table]:
-        return [table for table in self.sql_query.getTables()]
+    def get(self):
+        return self.projected
 
-    def joinLeaves(self):
-        def filterEqPred(predicate : Predicate) -> bool:
-            return (
-                predicate.op == PredicateOps.EQ and
-                len(predicate.operands) == 2 and
-                isinstance(predicate.operands[0], Column) and
-                isinstance(predicate.operands[1], Column) and
-                predicate.operands[0].table.alias != predicate.operands[1].table.alias
-            )
+    def __repr__(self):
+        return str(self.projected)
 
-        adj_list = [[] for i in self.leaves]
+    def buildTablesAsLeaves(self) -> List[RelationNode]:
+        return [RelationNode(table) for table in self.sql_query.tables]
 
-        def indexOfTable(table):
-            for i, leaf in enumerate(self.leaves):
-                if leaf.alias == table.alias:
-                    return i
-
-        for (idx, predicate) in self.sql_query.filterWherePredicates(filter_fn=filterEqPred):
-            lhs_table = predicate.operands[0].table
-            rhs_table = predicate.operands[1].table
-
-            lhs_index = indexOfTable(lhs_table)
-            rhs_index = indexOfTable(rhs_table)
-
-            adj_list[lhs_index].append((rhs_index, predicate, idx))
-            adj_list[rhs_index].append((lhs_index, predicate, idx))
-
-        visited = [False for i in self.leaves]
-
-        def dfs(u, visited, adj_list):
-            visited[u] = True
-            cur_join = RelationNode(table=self.leaves[u])
-
-            for (v, predicate, idx) in adj_list[u]:
-                if not visited[v]:
-                    return_value = dfs(v, visited, adj_list)
-                    cur_join = JoinNode(
-                        join_predicate=predicate, 
-                        children=[cur_join, return_value]
-                    )
-                    self.where_pred_alive[idx] = False
-
-            return cur_join
-
-        to_cross = []
-        for i in range(len(self.leaves)):
-            if not visited[i]:
-                to_cross.append(dfs(i, visited, adj_list))
+    def crossTables(self):
+        cur_node = self.leaves[0]
+        for i in range(1, len(self.leaves)):
+            cur_node = CrossNode(children=[cur_node, self.leaves[i]])
         
-        if len(to_cross) == 1:
-            return to_cross[0]
-        else:
-            return CrossNode(children=to_cross)
+        return cur_node
 
-    def seperateSelect(self, live_preds, cur_root):
+    def seperateSelect(self, predicates, cur_root):
         cur_node = cur_root
 
-        for predicate in live_preds:
+        for predicate in predicates:
             cur_node = SelectNode(predicate=predicate, children=[cur_node])
         
         return cur_node
@@ -93,16 +43,15 @@ class RATreeBuilder:
     def addGroupby(self, cur_root):
         cur_node = cur_root
 
-        group_by_cols = self.sql_query.getGroupByCols()
-        aggregations = [col for col in self.sql_query.getAllCols() if col.aggregation != Aggregation.NONE]
-        
+        group_by_cols = self.sql_query.groupby
+
         if len(group_by_cols) > 0:
-            return GroupbyNode(group_by_columns=group_by_cols, aggregations=aggregations, children=[cur_node])
+            return GroupbyNode(group_by_columns=group_by_cols, children=[cur_node])
         return cur_node
 
     def addProject(self, cur_root):
         cur_node = cur_root
 
-        project_cols = self.sql_query.getSelectCols()
+        project_cols = self.sql_query.select
 
         return ProjectNode(columns=project_cols, children=[cur_node])

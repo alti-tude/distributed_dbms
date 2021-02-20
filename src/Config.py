@@ -2,7 +2,7 @@ LOCAL_DB_CONFIG = {
     "user": "ddbms2",
     "password": "ddbms",
     "host": "localhost",
-    "database": "ddbms"
+    "database": "ddbms",
 }
 
 
@@ -11,5 +11,6 @@ SERVER_DB_CONFIG = {
     "password": "Samose",
     "host": "localhost",
     "database": "Samosa",
-    "auth_plugin": "mysql_native_password"
 }
+
+ConfigToUse = LOCAL_DB_CONFIG

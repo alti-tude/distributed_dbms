@@ -2,7 +2,7 @@ import json
 
 
 class Table:
-    def __init__(self, *, name, alias = None) -> None:
+    def __init__(self, name, alias = None) -> None:
         self.name = name
         self.alias = alias
         
@@ -17,4 +17,7 @@ class Table:
             }
         }
 
-        return json.dumps(output)
+        return str(output)
+    
+    def __eq__(self, o: object) -> bool:
+        return repr(self) == repr(o)
