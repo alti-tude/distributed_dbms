@@ -1,7 +1,7 @@
-import json
+from DDBMS.Parser.SQLQuery.BasePrimitive import BasePrimitive
 
 
-class Table:
+class Table(BasePrimitive):
     def __init__(self, name, alias = None) -> None:
         self.name = name
         self.alias = alias
@@ -9,15 +9,15 @@ class Table:
         if alias is None:
             self.alias = self.name
 
-    def __repr__(self):
+    def to_dict(self):
         output = {
             'Table': {
-                'name': str(self.name), 
-                'alias': str(self.alias)
+                'name': self.name, 
+                'alias': self.alias
             }
         }
 
-        return str(output)
+        return output
     
     def __eq__(self, o: object) -> bool:
         return repr(self) == repr(o)

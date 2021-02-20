@@ -87,9 +87,9 @@ class SQLQuery:
             "predicates" : self.predicates,
 
             "select" : self.select,
-            "where" : str(self.where),
+            "where" : self.where,
             "groupby" : self.groupby,
-            "having" : str(self.having)
+            "having" : self.having
         }
 
         return str(output)

@@ -17,110 +17,146 @@ class Node(ABC):
         child.parent = self
         self.children.append(child)
 
+    def getChildId(self, query_child):
+        for i, child in enumerate(self.children):
+            if query_child is child:
+                return i
+            
+        return -1
+
+    def replaceChild(self, old_child, new_child):
+        idx = self.getChildId(old_child)
+        assert idx != -1, f"Can't replace {old_child}: child does not exist"
+        self.children[idx] = new_child
+        return new_child
+
+    def deleteChild(self, child):
+        idx = self.getChildId(child)
+        if idx != -1:
+            return self.children.pop(idx)
+        
+        return child
+    
+    def childExists(self, child):
+        return self.getChildId(child) != -1
+
     @abstractmethod
-    def __repr__(self) -> str:
+    def to_dict(self):
         output = {
             'Node': {
                 'children': str(self.children)
             }
         }
 
-        return str(output)
+        return output
+
+    def __repr__(self) -> str:
+        return str(self.to_dict())
         
+    def __hash__(self) -> int:
+        return hash(repr(self))
+    
+    def __eq__(self, o: object) -> bool:
+        return repr(self) == repr(o)
 
 class SelectNode(Node):
     def __init__(self, *, predicate, children = []) -> None:
         super().__init__(children=children)
         self.predicate = predicate
 
-    def __repr__(self) -> str:
+    def to_dict(self):
         output = {
             'Select':{
-                'predicate': str(self.predicate),
-                'children': str(self.children)
+                'predicate': self.predicate.to_dict(),
+                'children': [child.to_dict() for child in self.children]
             }
         }
-        return str(output)
+        return output
 
 class ProjectNode(Node):
     def __init__(self, *, columns : List[Column], children=[]) -> None:
         super().__init__(children=children)
         self.columns = columns
     
-    def __repr__(self) -> str:
+    def to_dict(self):
         output = {
             'Project':{
-                'columns': str(self.columns),
-                'children': str(self.children)
+                'columns': [column.to_dict() for column in self.columns],
+                'children': [child.to_dict() for child in self.children]
             }
         }
-        return str(output)
+        return output
 
 class GroupbyNode(Node):
     def __init__(self, *, group_by_columns : List[Column], children = []) -> None:
         super().__init__(children=children)
         self.group_by_columns = group_by_columns
 
-    def __repr__(self) -> str:
+    def to_dict(self):
         output = {
             'Groupby':{
-                'group_by_columns': str(self.group_by_columns),
-                'children': str(self.children)
+                'group_by_columns': [column.to_dict() for column in self.group_by_columns],
+                'children': [child.to_dict() for child in self.children]
             }
         }
-        return str(output)
+        
+        return output
 
 class UnionNode(Node):
     def __init__(self, *, children = []) -> None:
         super().__init__(children=children)
 
-    def __repr__(self) -> str:
+    def to_dict(self):
         output = {
             'Union':{
-                'children': str(self.children)
+                'children': [child.to_dict() for child in self.children]
             }
         }
-        return str(output)
+        return output
 
 class JoinNode(Node):
     def __init__(self, join_predicate, children = []) -> None:
         super().__init__(children=children)
         self.join_predicate = join_predicate
 
-    def __repr__(self) -> str:
+    def to_dict(self):
         output = {
-            'Union':{
-                'join_predicate': str(self.join_predicate),
-                'children': str(self.children)
+            'Join':{
+                'join_predicate': self.join_predicate.to_dict(),
+                'children': [child.to_dict() for child in self.children]
             }
         }
-        return str(output)
+        
+        return output
+        
 
 class CrossNode(Node):
     def __init__(self, *, children = []) -> None:
         super().__init__(children=children)
 
-    def __repr__(self) -> str:
+    def to_dict(self):
         output = {
             'Cross':{
-                'children': str(self.children)
+                'children': [child.to_dict() for child in self.children]
             }
         }
-        return str(output)
+        
+        return output
 
 class RelationNode(Node):
     def __init__(self, table : Table) -> None:
         super().__init__(children=[])
         self.table = table
 
-    def __repr__(self) -> str:
+    def to_dict(self):
         output = {
             'Relation':{
-                'table': str(self.table),
-                'children': str(self.children)
+                'table': self.table.to_dict(),
+                'children': [child.to_dict() for child in self.children]
             }
         }
-        return str(output)
+
+        return output
 
     def __eq__(self, o: object) -> bool:
         if isinstance(o, Table):

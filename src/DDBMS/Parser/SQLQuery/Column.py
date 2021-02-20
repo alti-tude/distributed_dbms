@@ -1,8 +1,8 @@
-import json
+from DDBMS.Parser.SQLQuery.BasePrimitive import BasePrimitive
 from .Table import Table
 from .Symbols import Aggregation
 
-class Column:
+class Column(BasePrimitive):
     def __init__(self, name : str, table : Table, alias = None, aggregation = Aggregation.NONE) -> None:
         self.name = name
         self.table = table
@@ -12,17 +12,17 @@ class Column:
         if alias is None:
             self.alias = self.name
         
-    def __repr__(self) -> str:
+    def to_dict(self) :
         output = {
             'Column': {
-                'name': str(self.name), 
-                'table': str(self.table), 
-                'alias': str(self.alias), 
-                'agg': str(self.aggregation)
+                'name': self.name, 
+                'table': self.table.to_dict() if self.table is not None else None, 
+                'alias': self.alias, 
+                'agg': self.aggregation
             }
         }
             
-        return str(output)
-
+        return output
+    
     def __eq__(self, o: object) -> bool:
         return repr(self) == repr(o)

@@ -1,8 +1,7 @@
+from DDBMS.Parser.SQLQuery.BasePrimitive import BasePrimitive
 from DDBMS.Parser.SQLQuery.Column import Column
-from typing import Dict
-import json
 
-class Predicate:       
+class Predicate(BasePrimitive):       
     def __init__(self, operator = None, operands = None):
         self.operator = operator
         self.operands = operands
@@ -17,15 +16,22 @@ class Predicate:
         
         return columns
 
-    def __repr__(self):
+    def to_dict(self):
+        operand_dicts = []
+        for operand in self.operands:
+            if isinstance(operand, BasePrimitive):
+                operand_dicts.append(operand.to_dict())
+            else:
+                operand_dicts.append(operand)    
+        
         output = {
             'Predicate': {
-                'operator': str(self.operator), 
-                'operands': self.operands
+                'operator': self.operator, 
+                'operands': operand_dicts
             }
         }
 
-        return str(output)
+        return output
 
     def __eq__(self, o: object) -> bool:
         return repr(self) == repr(o)
