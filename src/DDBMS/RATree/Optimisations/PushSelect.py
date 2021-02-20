@@ -47,20 +47,27 @@ def getNewParent(select_cols, node):
     return None
     
 
+def insertSelect(parent, child_idx, select_node):
+    select_node.parent.replaceChild(select_node, select_node.children[0])
+    old_child = parent.replaceChildById(select_node, child_idx)
+    select_node.replaceChildById(old_child, 0)
+
 
 def pushSelect(ra_tree):
     select_nodes = getSelectNodes(ra_tree.projected)
     if len(select_nodes) == 0:
         return ra_tree
 
-    new_parents = []
     for select_node in select_nodes:
         select_node_cols = select_node.predicate.getAllColumns()
-        new_parents.append(getNewParent(select_node_cols, select_node))
+        parent_detail = getNewParent(select_node_cols, select_node)
+
+        if parent_detail is not None:
+            parent, child_idx = parent_detail
+            if child_idx != -1:
+                insertSelect(parent, child_idx, select_node)
+            else:
+                for i in range(len(parent.children)):
+                    insertSelect(parent, i, select_node)
     
-    for new_parent in new_parents:
-        print(new_parent)
-
-
-
-
+    return ra_tree

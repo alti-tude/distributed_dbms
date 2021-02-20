@@ -4,7 +4,6 @@ from DDBMS.Parser.SQLQuery.Column import Column
 from DDBMS.Parser.SQLQuery.Table import Table
 from abc import ABC, abstractmethod
 
-#TODO add a function to return the output dict as  dict (for pretty printing later)
 class Node(BasePrimitive):
     def __init__(self, *, children = []) -> None:
         super().__init__()
@@ -25,11 +24,16 @@ class Node(BasePrimitive):
             
         return -1
 
+    def replaceChildById(self, new_child, idx):
+        old_child = self.children[idx]
+        new_child.parent = self
+        self.children[idx] = new_child
+        return old_child
+
     def replaceChild(self, old_child, new_child):
         idx = self.getChildId(old_child)
         assert idx != -1, f"Can't replace {old_child}: child does not exist"
-        self.children[idx] = new_child
-        return new_child
+        return self.replaceChildById(new_child, idx)
 
     def deleteChild(self, child):
         idx = self.getChildId(child)
@@ -50,11 +54,6 @@ class Node(BasePrimitive):
 
         return output
 
-    def __hash__(self) -> int:
-        return hash(repr(self))
-    
-    def __eq__(self, o: object) -> bool:
-        return repr(self) == repr(o)
 
 class SelectNode(Node):
     def __init__(self, *, predicate, children = []) -> None:
