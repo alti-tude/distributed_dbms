@@ -19,8 +19,9 @@
 from DDBMS.Parser.SQLParser import *
 from DDBMS.RATree import RATreeBuilder
 from pprint import PrettyPrinter 
+from DDBMS.RATree.Optimisations import *
 
-pp = PrettyPrinter(indent=2, compact=True, depth=2)
+pp = PrettyPrinter(indent=2, compact=True)
 
 query = input()
 parser = SQLParser()
@@ -28,9 +29,11 @@ sql_query = parser.parse(query)
 # print(sql_query)
 
 ra_tree = RATreeBuilder(sql_query)
-from DDBMS.RATree.Optimisations import CombineSelectAndCross
-
 pp.pprint(ra_tree.projected.to_dict())
+ra_tree = pushSelect(ra_tree)
+pp.pprint(ra_tree.projected.to_dict())
+
+# from DDBMS.RATree.Optimisations import CombineSelectAndCross
 
 # CombineSelectAndCross(ra_tree)
 

@@ -32,7 +32,7 @@ def __pullUp(union : UnionNode) -> Tuple(bool, Node):
             #TODO write with proper left right semantics
             union_idx = parent.getChildId(union)
             new_node = CrossNode(children=deepcopy(parent.children))
-            new_node.setChild(union_idx, child)
+            new_node.replaceChildById(union_idx, child)
             new_nodes.append(new_node)
 
     elif isinstance(parent, JoinNode):
@@ -40,7 +40,7 @@ def __pullUp(union : UnionNode) -> Tuple(bool, Node):
             #TODO write with proper left right semantics
             union_idx = parent.getChildId(union)
             new_node = JoinNode(join_predicate=parent.join_predicate, children=deepcopy(parent.children))
-            new_node.setChild(union_idx, child)
+            new_node.replaceChildById(union_idx, child)
             new_nodes.append(new_node)
 
     elif isinstance(parent, UnionNode):
