@@ -7,10 +7,8 @@ from copy import deepcopy
 
 class RATreeBuilder:
     def __init__(self, sql_query: SQLQuery):
-        self.sql_query = deepcopy(sql_query)
+        self.sql_query = sql_query
         
-        # self.where_pred_alive = [True for i in self.sql_query.filterWherePredicates()]
-
         self.leaves = self.buildTablesAsLeaves()
         self.joined = self.crossTables()
         self.selected = self.seperateSelect(self.sql_query.where, self.joined)
@@ -18,9 +16,11 @@ class RATreeBuilder:
         self.having_added = self.seperateSelect(self.sql_query.having, self.gamma_added)
         self.projected = self.addProject(self.having_added)
 
+    def get(self):
+        return self.projected
+
     def __repr__(self):
         return str(self.projected)
-
 
     def buildTablesAsLeaves(self) -> List[RelationNode]:
         return [RelationNode(table) for table in self.sql_query.tables]
@@ -35,9 +35,8 @@ class RATreeBuilder:
     def seperateSelect(self, predicates, cur_root):
         cur_node = cur_root
 
-        if predicates is not None:
-            for predicate in predicates:
-                cur_node = SelectNode(predicate=predicate, children=[cur_node])
+        for predicate in predicates:
+            cur_node = SelectNode(predicate=predicate, children=[cur_node])
         
         return cur_node
     
