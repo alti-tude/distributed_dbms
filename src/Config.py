@@ -1,8 +1,8 @@
 LOCAL_DB_CONFIG = {
-    "user": "Samosa",
-    "password": "Samose",
+    "user": "ddbms2",
+    "password": "ddbms",
     "host": "localhost",
-    "database": "Samosa",
+    "database": "ddbms",
 }
 
 
