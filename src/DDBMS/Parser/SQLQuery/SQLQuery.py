@@ -14,9 +14,9 @@ class SQLQuery:
         self.predicates = []
 
         self.select = []
-        self.where = None
+        self.where = []
         self.groupby = []
-        self.having = None
+        self.having = []
 
     def addFrom(self, table):
         self.tables.append(table)

@@ -7,9 +7,14 @@ from abc import ABC, abstractmethod
 class Node(ABC):
     def __init__(self, *, children = []) -> None:
         super().__init__()
-        self.children = children
+        self.parent = None
+
+        self.children = []
+        for child in children:
+            self.addChild(child)
 
     def addChild(self, child) -> None:
+        child.parent = self
         self.children.append(child)
 
     @abstractmethod
