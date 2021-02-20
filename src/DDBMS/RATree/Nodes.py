@@ -24,7 +24,7 @@ class Node(BasePrimitive):
             
         return -1
 
-    def replaceChildById(self, new_child, idx):
+    def replaceChildById(self, idx, new_child):
         old_child = self.children[idx]
         new_child.parent = self
         self.children[idx] = new_child
@@ -33,7 +33,7 @@ class Node(BasePrimitive):
     def replaceChild(self, old_child, new_child):
         idx = self.getChildId(old_child)
         assert idx != -1, f"Can't replace {old_child}: child does not exist"
-        return self.replaceChildById(new_child, idx)
+        return self.replaceChildById(idx, new_child)
 
     def deleteChild(self, child):
         idx = self.getChildId(child)

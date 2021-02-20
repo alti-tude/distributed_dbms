@@ -49,8 +49,8 @@ def getNewParent(select_cols, node):
 
 def insertSelect(parent, child_idx, select_node):
     select_node.parent.replaceChild(select_node, select_node.children[0])
-    old_child = parent.replaceChildById(select_node, child_idx)
-    select_node.replaceChildById(old_child, 0)
+    old_child = parent.replaceChildById(child_idx, select_node)
+    select_node.replaceChildById(0, old_child)
 
 
 def pushSelect(ra_tree):
