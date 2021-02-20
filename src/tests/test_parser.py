@@ -1,5 +1,6 @@
 from DDBMS.Parser.SQLQuery import Column, SQLQuery, Table
 from DDBMS.RATree.RATreeBuilder import RATreeBuilder
+from DDBMS.Parser import SQLParser
 import DDBMS
 
 def test_getPredicateObj():
@@ -18,3 +19,13 @@ def test_getPredicateObj():
 
     assert str(predicate) == target
 
+#region Regression TEST
+def test_aggregation():
+
+    query = "select max(MovieID) from Movie;"
+
+    SQLParser().parse(query)
+
+    assert 1==1
+
+#endregion  
