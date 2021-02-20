@@ -16,9 +16,6 @@ class RATreeBuilder:
         self.having_added = self.seperateSelect(self.sql_query.having, self.gamma_added)
         self.projected = self.addProject(self.having_added)
 
-    def get(self):
-        return self.projected
-
     def __repr__(self):
         return str(self.projected)
 

@@ -1,4 +1,3 @@
-import json
 from typing import List
 from DDBMS.Parser.SQLQuery.Column import Column
 from DDBMS.Parser.SQLQuery.Table import Table
