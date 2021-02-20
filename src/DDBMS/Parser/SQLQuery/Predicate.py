@@ -1,4 +1,4 @@
-from DDBMS.Parser.SQLQuery.BasePrimitive import BasePrimitive
+from DDBMS.BasePrimitive import BasePrimitive
 from DDBMS.Parser.SQLQuery.Column import Column
 
 class Predicate(BasePrimitive):       

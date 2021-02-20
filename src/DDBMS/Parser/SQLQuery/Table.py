@@ -1,4 +1,4 @@
-from DDBMS.Parser.SQLQuery.BasePrimitive import BasePrimitive
+from DDBMS.BasePrimitive import BasePrimitive
 
 
 class Table(BasePrimitive):

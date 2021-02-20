@@ -1,10 +1,11 @@
+from DDBMS.BasePrimitive import BasePrimitive
 from typing import List
 from DDBMS.Parser.SQLQuery.Column import Column
 from DDBMS.Parser.SQLQuery.Table import Table
 from abc import ABC, abstractmethod
 
 #TODO add a function to return the output dict as  dict (for pretty printing later)
-class Node(ABC):
+class Node(BasePrimitive):
     def __init__(self, *, children = []) -> None:
         super().__init__()
         self.parent = None
@@ -40,7 +41,6 @@ class Node(ABC):
     def childExists(self, child):
         return self.getChildId(child) != -1
 
-    @abstractmethod
     def to_dict(self):
         output = {
             'Node': {
@@ -50,9 +50,6 @@ class Node(ABC):
 
         return output
 
-    def __repr__(self) -> str:
-        return str(self.to_dict())
-        
     def __hash__(self) -> int:
         return hash(repr(self))
     

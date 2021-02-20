@@ -1,4 +1,4 @@
-from DDBMS.Parser.SQLQuery.BasePrimitive import BasePrimitive
+from DDBMS.BasePrimitive import BasePrimitive
 from .Table import Table
 from .Symbols import Aggregation
 
