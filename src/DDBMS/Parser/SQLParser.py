@@ -110,7 +110,7 @@ class SQLParser:
                 col_alias = None
 
                 if isinstance(col['value'], dict):
-                    col_aggr = next(iter(attr['value']))
+                    col_aggr = next(iter(col['value']))
                     col_name = col['value'][col_aggr]
                 if 'name' in col:
                     col_alias = col['name']
