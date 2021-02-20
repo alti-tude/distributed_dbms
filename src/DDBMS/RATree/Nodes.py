@@ -58,7 +58,7 @@ class ProjectNode(Node):
         return str(output)
 
 class GroupbyNode(Node):
-    def __init__(self, *, group_by_columns : List[Column], aggregations : List[Column], children = []) -> None:
+    def __init__(self, *, group_by_columns : List[Column], children = []) -> None:
         super().__init__(children=children)
         self.group_by_columns = group_by_columns
 
