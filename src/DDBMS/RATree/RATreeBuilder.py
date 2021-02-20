@@ -20,8 +20,21 @@ class RATreeBuilder:
         self.having_added = self.seperateSelect(self.sql_query.having, self.gamma_added)
         self.projected = self.addProject(self.having_added)
 
+        self.is_localised = False
+
     def __repr__(self):
         return str(self.projected)
+
+    def getLocalised(self):
+        if self.is_localised:
+            return self
+
+        localised = deepcopy(self)
+        localised.is_localised = True
+
+
+        #TODO replace relations with frags in localised
+        return localised
 
     def buildTablesAsLeaves(self) -> List[RelationNode]:
         return [RelationNode(table) for table in self.sql_query.tables]

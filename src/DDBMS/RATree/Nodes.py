@@ -13,6 +13,9 @@ class Node(BasePrimitive):
         for child in children:
             self.addChild(child)
 
+    def makeRoot(self):
+        self.parent = None
+        
     def addChild(self, child) -> None:
         child.parent = self
         self.children.append(child)
@@ -23,6 +26,11 @@ class Node(BasePrimitive):
                 return i
             
         return -1
+
+    def setChild(self, idx, child):
+        child.parent = self
+        assert len(self.children) > idx, f"set idx {idx} out of bounds for array {self.children}"
+        self.children[idx] = child
 
     def replaceChild(self, old_child, new_child):
         idx = self.getChildId(old_child)
