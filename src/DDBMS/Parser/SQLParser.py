@@ -9,7 +9,7 @@ class SQLParser:
         self.schema = self.getApplicationSchema()
 
     def reset(self):
-        self.formatted_query.reset()
+        self.formatted_query = SQLQuery()
 
     @db.execute
     def getApplicationSchema(self):

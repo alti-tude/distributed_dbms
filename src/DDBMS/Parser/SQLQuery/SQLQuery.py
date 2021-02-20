@@ -6,9 +6,6 @@ from .Symbols import *
 
 class SQLQuery:       
     def __init__(self):
-        self.reset()
-
-    def reset(self):
         self.columns = []
         self.tables = []
         self.predicates = []
