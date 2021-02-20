@@ -4,6 +4,7 @@ from DDBMS.Parser.SQLQuery.Column import Column
 from DDBMS.Parser.SQLQuery.Table import Table
 from abc import ABC, abstractmethod
 
+#TODO add a function to return the output dict as  dict (for pretty printing later)
 class Node(ABC):
     def __init__(self, *, children = []) -> None:
         super().__init__()
