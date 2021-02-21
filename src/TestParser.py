@@ -16,25 +16,24 @@
 # print(getPredicateObj(predicate))
 
 
+from DDBMS.RATree.Transformations.Localise import materialiseAllTables, materialiseTable
+from DDBMS.RATree.Transformations.MoveUnionUp import moveUnionUp
 from DDBMS.Parser.SQLParser import *
 from DDBMS.RATree import RATreeBuilder
 from pprint import PrettyPrinter 
-from DDBMS.RATree.Transformations import *
 
 pp = PrettyPrinter(indent=2, compact=True)
 
-query = input()
+query = "select * from Theater group by TheaterID;"
 parser = SQLParser()
 sql_query = parser.parse(query)
-# print(sql_query)
+print(id(sql_query))
+print(sql_query)
 
-ra_tree = RATreeBuilder(sql_query)
+ra_tree = RATreeBuilder()
 pp.pprint(ra_tree.projected.to_dict())
-ra_tree = pushSelect(ra_tree)
-pp.pprint(ra_tree.projected.to_dict())
-
-ra_tree = pushProject(ra_tree)
-pp.pprint(ra_tree.projected.to_dict())
+pp.pprint(materialiseAllTables(ra_tree.projected).to_dict())
+pp.pprint(moveUnionUp(ra_tree.projected).to_dict())
 
 # from DDBMS.RATree.Optimisations import CombineSelectAndCross
 

@@ -5,7 +5,7 @@ from DDBMS.Parser.SQLQuery import *
 
 class SQLParser:
     def __init__(self):
-        self.formatted_query = SQLQuery()
+        self.formatted_query = SQLQuery.get()
         self.schema = self.getApplicationSchema()
 
     @db.execute

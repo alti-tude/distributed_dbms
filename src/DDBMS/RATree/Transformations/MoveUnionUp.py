@@ -14,9 +14,9 @@ def __getAllUnions(cur_node : Node) -> List[UnionNode]:
     
     return result
 
-def __pullUp(union : UnionNode) -> Tuple(bool, Node):
+def __pullUp(union : UnionNode) -> Tuple[bool, Node]:
     parent : Node = union.parent
-    grand_parent : Node = parent.parent
+    grand_parent : Node = None if parent is None else parent.parent
 
     new_nodes = []
     if isinstance(parent, SelectNode):
@@ -51,7 +51,7 @@ def __pullUp(union : UnionNode) -> Tuple(bool, Node):
         
     else: return False, None
 
-    for (child, new_node) in list(zip(union.children, new_node)):
+    for (child, new_node) in list(zip(union.children, new_nodes)):
         union.replaceChild(child, new_node)
 
     if grand_parent is None:
@@ -61,7 +61,7 @@ def __pullUp(union : UnionNode) -> Tuple(bool, Node):
         grand_parent.replaceChild(parent, union)
         return True, None
     
-def __moveUnionUpStep(root : Node) -> Tuple(bool, Node):
+def __moveUnionUpStep(root : Node) -> Tuple[bool, Node]:
     unions = __getAllUnions(root)
 
     is_pulled = False

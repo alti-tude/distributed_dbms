@@ -32,12 +32,8 @@ CREATE TABLE VerticalFragment (
 
 CREATE TABLE HorizontalFragment (
     FragmentID VARCHAR(255) NOT NULL,
-    AttributeID INT NOT NULL,
-    Operator VARCHAR(30) NOT NULL,
-    Value TEXT NOT NULL,
-    FOREIGN KEY (FragmentID) REFERENCES Fragment(FragmentID),
-    FOREIGN KEY (AttributeID) REFERENCES Attribute(AttributeID),
-    PRIMARY KEY (FragmentID, AttributeID, Operator)
+    Predicate MEDIUMTEXT,
+    FOREIGN KEY (FragmentID) REFERENCES Fragment(FragmentID)
 );
 
 CREATE TABLE DerivedHorizontalFragment (
@@ -152,22 +148,13 @@ WHERE   RelationName = 'Movie' AND
 
 /*------------------------------------HORIZONTAL FRAGMENTATION*/
 INSERT INTO HorizontalFragment
-SELECT 'Theater_D', AttributeID, '=', 'Delhi'
-FROM    Attribute
-WHERE   RelationName = 'Theater' AND
-        AttributeName = 'Location';
+VALUES ('Theater_D', 'Location = "Delhi"');
 
 INSERT INTO HorizontalFragment
-SELECT 'Theater_M', AttributeID, '=', 'Mumbai'
-FROM    Attribute
-WHERE   RelationName = 'Theater' AND
-        AttributeName = 'Location';
+VALUES ('Theater_M', 'Location = "Mumbai"');
 
 INSERT INTO HorizontalFragment
-SELECT 'Theater_H', AttributeID, '=', 'Hyderabad'
-FROM    Attribute
-WHERE   RelationName = 'Theater' AND
-        AttributeName = 'Location';
+VALUES ('Theater_H', 'Location = "Hyderabad"');
 
 /*------------------------------------DERIVED HORIZONTAL FRAGMENTATION*/
 SET @ScreenTheaterID  = 0;

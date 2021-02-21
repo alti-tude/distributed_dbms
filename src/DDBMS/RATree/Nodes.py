@@ -1,7 +1,6 @@
 from DDBMS.BasePrimitive import BasePrimitive
 from typing import List
-from DDBMS.Parser.SQLQuery.Column import Column
-from DDBMS.Parser.SQLQuery.Table import Table
+from DDBMS.Parser.SQLQuery import Column, Table, Predicate
 from abc import ABC, abstractmethod
 
 class Node(BasePrimitive):
@@ -13,6 +12,7 @@ class Node(BasePrimitive):
         for child in children:
             self.addChild(child)
 
+        
     def makeRoot(self):
         self.parent = None
         
@@ -127,7 +127,6 @@ class JoinNode(Node):
         }
         
         return output
-        
 
 class CrossNode(Node):
     def __init__(self, *, children = []) -> None:
@@ -143,8 +142,8 @@ class CrossNode(Node):
         return output
 
 class RelationNode(Node):
-    def __init__(self, table : Table) -> None:
-        super().__init__(children=[])
+    def __init__(self, table : Table, children = []) -> None:
+        super().__init__(children=children)
         self.table = table
 
     def to_dict(self):
@@ -162,3 +161,19 @@ class RelationNode(Node):
             return self.table == o
         
         return super().__eq__(o)
+
+class HorizontalFragNode(RelationNode):
+    def __init__(self, name, table: Table, predicate : Predicate, children = []) -> None:
+        super().__init__(table, children)
+        self.name = name
+        self.predicate = predicate
+    
+    def to_dict(self):
+        return {
+            "HorizontalFragNode":{
+                "name": self.name,
+                "table": self.table.to_dict(),
+                "predicate": self.predicate.to_dict(),
+                "children": [child.to_dict() for child in self.children]
+            }
+        }

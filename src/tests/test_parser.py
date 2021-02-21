@@ -5,7 +5,7 @@ import DDBMS
 
 def test_getPredicateObj():
 
-    predicate = SQLQuery().newPredicate({
+    predicate = SQLQuery.get().newPredicate({
         'and': [
             {'gt': [Column(name="id", table=Table(name="t1")), 3]},
             {'eq': [Column(name="a", table=Table(name="t1")), Column(name="b", table=Table(name="t2"))]},
