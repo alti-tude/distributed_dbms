@@ -1,5 +1,5 @@
 from pandas.core.frame import DataFrame
-from DDBMS.Parser.SQLQuery.Symbols import PredicateOps
+from DDBMS.Parser.SQLQuery.Symbols import Keywords, PredicateOps
 from DDBMS.Parser.SQLQuery.SQLQuery import SQLQuery
 from DDBMS.Parser.SQLQuery.Column import Column
 from DDBMS.RATree.RATreeBuilder import RATreeBuilder, seperateSelect
@@ -38,7 +38,7 @@ def materialiseHorizontalFrag(fragment_details, table : Table):
     name = fragment_details['FragmentID']
 
     dummy_query = f"select * from temp where {fragment_details['Predicate']}".replace('"', "'")
-    predicate_dict = moz_sql_parser.parse(dummy_query)['where']
+    predicate_dict = moz_sql_parser.parse(dummy_query)[Keywords.WHERE]
     predicate_dict = SQLParser().parsePredicate(predicate_dict) #convert to Columns and Tables
     processed_predicate = SQLQuery.get().newPredicate(predicate_dict) #convert to predicate object
     
