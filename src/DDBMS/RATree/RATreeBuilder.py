@@ -49,6 +49,11 @@ class RATreeBuilder:
         required_columns.extend(self.sql_query.groupby)
         required_columns.extend(self.sql_query.select)
 
+        for i, col in enumerate(required_columns):
+            if col.aggregation != Aggregation.NONE:
+                required_columns[i] = self.sql_query.newColumn(col.name, col.table, col.alias, Aggregation.NONE)
+        
+        required_columns = list(set(required_columns))
         return ProjectNode(columns=required_columns, children=[cur_root])
 
     def addGroupby(self, cur_root):
