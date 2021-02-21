@@ -70,8 +70,8 @@ class RATreeBuilder:
     #TODO store this in a store object
     def __init__(self):
         self.sql_query = SQLQuery.get()
+
         #bottom up tree
-        print(id(self.sql_query))
         self.leaves = [RelationNode(table) for table in self.sql_query.tables]
         self.joined = crossNodes(self.leaves)
         self.selected = seperateSelect(self.sql_query.where, self.joined)

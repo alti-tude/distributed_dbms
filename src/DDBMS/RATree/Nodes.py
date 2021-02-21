@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 class Node(BasePrimitive):
     def __init__(self, *, children = []) -> None:
         super().__init__()
-        self.parent = None
+        self.parent : Node = None
 
         self.children = []
         for child in children:

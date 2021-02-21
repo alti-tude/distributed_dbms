@@ -48,10 +48,6 @@ def materialiseHorizontalFrag(fragment_details, table : Table):
 
 #endregion
 
-# #region VERTICAL FRAG
-# @db.execute
-# def __getVerticalFrags(relation_name):
-    
 
 def materialiseTable(table : Table):
     frag_types : DataFrame = __getFragments(table.name)
