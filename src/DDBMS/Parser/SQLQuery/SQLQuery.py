@@ -1,4 +1,6 @@
 from typing import List
+
+from typing_extensions import TypeVarTuple
 from .Predicate import Predicate
 from .Column import Column
 from .Table import Table
@@ -79,6 +81,14 @@ class SQLQuery:
         self.predicates.append(new_predicate)
         return new_predicate
     
+    def filterCols(self, name = None, alias = None, table : Table = None, aggregation = None):
+        cols = self.columns
+        cols = list(filter(lambda col : col.name == name or name is None, cols))
+        cols = list(filter(lambda col : col.alias == alias or alias is None, cols))
+        cols = list(filter(lambda col : col.table is table or table is None, cols))
+        cols = list(filter(lambda col : col.aggregation == aggregation or aggregation is None, cols))
+
+        return cols
 
     def __repr__(self) -> str:
         output = {
