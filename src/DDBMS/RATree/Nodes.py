@@ -177,3 +177,19 @@ class HorizontalFragNode(RelationNode):
                 "children": [child.to_dict() for child in self.children]
             }
         }
+
+class VerticalFragNode(RelationNode):
+    def __init__(self, name, table: Table, columns : [], children = []) -> None:
+        super().__init__(table, children)
+        self.name = name
+        self.columns = columns
+    
+    def to_dict(self):
+        return {
+            "VerticalFragNode":{
+                "name": self.name,
+                "table": self.table.to_dict(),
+                "columns": [column.to_dict() for column in self.columns],
+                "children": [child.to_dict() for child in self.children]
+            }
+        }

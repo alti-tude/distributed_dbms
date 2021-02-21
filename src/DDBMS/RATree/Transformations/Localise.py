@@ -1,9 +1,11 @@
 from pandas.core.frame import DataFrame
+from DDBMS.Parser.SQLQuery.Symbols import PredicateOps
 from DDBMS.Parser.SQLQuery.SQLQuery import SQLQuery
+from DDBMS.Parser.SQLQuery.Column import Column
 from DDBMS.RATree.RATreeBuilder import RATreeBuilder, seperateSelect
 from DDBMS.Parser.SQLParser import SQLParser
 from DDBMS.Parser.SQLQuery.Table import Table
-from DDBMS.RATree.Nodes import HorizontalFragNode, Node, RelationNode, UnionNode
+from DDBMS.RATree.Nodes import *
 from DDBMS.DB import db
 
 import moz_sql_parser
@@ -37,7 +39,6 @@ def materialiseHorizontalFrag(fragment_details, table : Table):
 
     dummy_query = f"select * from temp where {fragment_details['Predicate']}".replace('"', "'")
     predicate_dict = moz_sql_parser.parse(dummy_query)['where']
-    print(predicate_dict)
     predicate_dict = SQLParser().parsePredicate(predicate_dict) #convert to Columns and Tables
     processed_predicate = SQLQuery.get().newPredicate(predicate_dict) #convert to predicate object
     
@@ -48,10 +49,41 @@ def materialiseHorizontalFrag(fragment_details, table : Table):
 
 #endregion
 
-# #region VERTICAL FRAG
-# @db.execute
-# def __getVerticalFrags(relation_name):
+#region VERTICAL FRAG
+@db.execute
+def __getVerticalFrags(relation_name):
+    #RelationName | AttributeID | FragmentID | FragmentationType | AttributeName | DataType | isKey
+    return f"CALL getVerticalFragments('{relation_name}')"
+
+def materialiseVerticalFrag(frag_name, attributes, table):
+    cols = []
+    for attribute in attributes:
+        cols.append(SQLQuery.get().newColumn(name=attribute, table=table))
+
+    relation_node = RelationNode(table)
+    project_node = ProjectNode(columns=cols, children=[relation_node])
+    return VerticalFragNode(name=frag_name, table=table, columns=cols, children=[project_node])
+
+
+def joinVerticalFrags(node1, cols_1, node2, cols_2):
+    common_cols = list(set(cols_1).intersection(cols_2))
+    sub_predicate_dicts = []
+
+    for common_col in common_cols:
+        sub_predicate_dict = {PredicateOps.EQ : [common_col, common_col]}
+        sub_predicate_dicts.append(sub_predicate_dict)
+
+    processed_predicate = None
+    if len(sub_predicate_dicts) == 1:
+        processed_predicate = SQLQuery.get().newPredicate(sub_predicate_dicts[0]) 
+    else:
+        predicate_dict = {PredicateOps.AND : sub_predicate_dicts}
+        processed_predicate = SQLQuery.get().newPredicate(predicate_dict)
     
+    return JoinNode(join_predicate=processed_predicate, children=[node1, node2])
+    
+#endregion
+
 
 def materialiseTable(table : Table):
     frag_types : DataFrame = __getFragments(table.name)
@@ -63,6 +95,25 @@ def materialiseTable(table : Table):
             frags.append(materialiseHorizontalFrag(frag_detail, table))
 
         return UnionNode(children=frags)
+    
+    elif frag_types.iloc[0]['FragmentationType'] == 'V':
+        frag_details : DataFrame = __getVerticalFrags(table.name)
+        frag_names = frag_details['FragmentID'].unique()
+        frags = []
+
+        for frag_name in frag_names:
+            frag_detail = frag_details.loc[frag_details['FragmentID'] == frag_name]
+            frags.append(materialiseVerticalFrag(frag_name, frag_detail['AttributeName'], table))
+
+        cur_node = frags[0]
+        cur_cols = cur_node.columns
+        for i in range(1, len(frags)):
+            new_node = frags[i]
+            new_cols = new_node.columns
+            cur_node = joinVerticalFrags(cur_node, cur_cols, new_node, new_cols)
+            cur_cols = list(set(cur_cols + new_cols))
+
+        return cur_node
 
 def materialiseAllTables(node : Node):
     if isinstance(node, RelationNode):

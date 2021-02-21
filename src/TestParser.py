@@ -18,13 +18,15 @@
 
 from DDBMS.RATree.Transformations.Localise import materialiseAllTables, materialiseTable
 from DDBMS.RATree.Transformations.MoveUnionUp import moveUnionUp
+from DDBMS.RATree.Transformations.PushProject import pushProject
+from DDBMS.RATree.Transformations.PushSelect import pushSelect
 from DDBMS.Parser.SQLParser import *
 from DDBMS.RATree import RATreeBuilder
 from pprint import PrettyPrinter 
 
 pp = PrettyPrinter(indent=2, compact=True)
 
-query = "select * from Theater group by TheaterID;"
+query = "select * from Movie;"
 parser = SQLParser()
 sql_query = parser.parse(query)
 print(id(sql_query))
@@ -32,8 +34,13 @@ print(sql_query)
 
 ra_tree = RATreeBuilder()
 pp.pprint(ra_tree.projected.to_dict())
+# ra_tree = pushSelect(ra_tree)
+# pp.pprint(ra_tree.projected.to_dict())
+# ra_tree = pushProject(ra_tree)
+# pp.pprint(ra_tree.projected.to_dict())
+
 pp.pprint(materialiseAllTables(ra_tree.projected).to_dict())
-pp.pprint(moveUnionUp(ra_tree.projected).to_dict())
+# pp.pprint(moveUnionUp(ra_tree.projected).to_dict())
 
 # from DDBMS.RATree.Optimisations import CombineSelectAndCross
 
