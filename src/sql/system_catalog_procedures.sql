@@ -2,6 +2,7 @@ DROP PROCEDURE IF EXISTS getFragments;
 DROP PROCEDURE IF EXISTS getSites;
 DROP PROCEDURE IF EXISTS getHorizontalFragments;
 DROP PROCEDURE IF EXISTS getVerticalFragments;
+DROP PROCEDURE IF EXISTS getDerivedHorizontalFragments;
 
 
 DELIMITER $$
@@ -41,5 +42,22 @@ BEGIN
             NATURAL JOIN VerticalFragment
             NATURAL JOIN Attribute
     WHERE   RelationName = relation_name;
+END $$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE getDerivedHorizontalFragments(IN relation_name VARCHAR(255))
+BEGIN
+    SELECT  FragmentID as LeftFragmentID, Fragment.RelationName as LeftRelationName, 
+            LeftAttribute.AttributeName as LeftAttributeName, RightFragmentID, 
+            RightAttribute.RelationName as RightRelationName,
+            RightAttribute.AttributeName as RightAttributeName
+    FROM    Fragment
+            NATURAL JOIN DerivedHorizontalFragment
+            JOIN Attribute as LeftAttribute 
+            JOIN Attribute as RightAttribute
+    WHERE   Fragment.RelationName = relation_name
+            AND LeftAttributeID = LeftAttribute.AttributeID
+            AND RightAttributeID = RightAttribute.AttributeID;
 END $$
 DELIMITER ;
