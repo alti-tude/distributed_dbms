@@ -34,6 +34,7 @@ class RATreeBuilder:
 
 
         #TODO replace relations with frags in localised
+        #TODO write a seperate localisation function in a seperate file
         return localised
 
     def buildTablesAsLeaves(self) -> List[RelationNode]:

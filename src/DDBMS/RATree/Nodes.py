@@ -27,20 +27,8 @@ class Node(BasePrimitive):
             
         return -1
 
-<<<<<<< HEAD
-    def setChild(self, idx, child):
-        child.parent = self
-        assert len(self.children) > idx, f"set idx {idx} out of bounds for array {self.children}"
-        self.children[idx] = child
-
-    def replaceChild(self, old_child, new_child):
-        idx = self.getChildId(old_child)
-        assert idx != -1, f"Can't replace {old_child}: child does not exist"
-
-=======
     def replaceChildById(self, idx, new_child):
         old_child = self.children[idx]
->>>>>>> ra_tree_rewrite
         new_child.parent = self
         self.children[idx] = new_child
         return old_child
