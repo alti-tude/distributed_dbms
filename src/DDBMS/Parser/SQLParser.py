@@ -5,11 +5,8 @@ from DDBMS.Parser.SQLQuery import *
 
 class SQLParser:
     def __init__(self):
-        self.formatted_query = SQLQuery()
+        self.formatted_query = SQLQuery.get()
         self.schema = self.getApplicationSchema()
-
-    def reset(self):
-        self.formatted_query = SQLQuery()
 
     @db.execute
     def getApplicationSchema(self):
@@ -33,9 +30,7 @@ class SQLParser:
             predicate = self.parsePredicate(query['having'])
             self.formatted_query.addHavingPredicate(predicate)
 
-        final_format = copy.deepcopy(self.formatted_query)
-        self.reset()
-        return final_format
+        return self.formatted_query
 
 
     def addFromTables(self, clause):
@@ -44,9 +39,9 @@ class SQLParser:
         for table in from_tables:
             cur_table = None
             if isinstance(table, dict):
-                cur_table = Table(table['value'], table['name'])
+                cur_table = self.formatted_query.newTable(table['value'], table['name'])
             else:
-                cur_table = Table(table)
+                cur_table = self.formatted_query.newTable(table)
             self.formatted_query.addFrom(cur_table)
 
 
@@ -130,18 +125,17 @@ class SQLParser:
         for i, val in enumerate(predicate[predicate_key]):
             if isinstance(val, str):
                 col_table, col_name = self.parseColumn(val)
-                predicate[predicate_key][i] = Column(col_name, col_table)
+                predicate[predicate_key][i] = self.formatted_query.newColumn(col_name, col_table)
             elif isinstance(val, dict):
                 col_aggr = next(iter(val))
                 if col_aggr != 'literal':
                     col_table, col_name = self.parseColumn(val[col_aggr])
-                    predicate[predicate_key][i] = Column(col_name, col_table, aggregation=col_aggr)
+                    predicate[predicate_key][i] = self.formatted_query.newColumn(col_name, col_table, aggregation=col_aggr)
                 else:
                     predicate[predicate_key][i] = val[col_aggr]
 
 
-    def parsePredicate(self, clause):
-        predicate = copy.deepcopy(clause)
+    def parsePredicate(self, predicate):
         predicate_key = next(iter(predicate))
 
         if predicate_key != 'and':
