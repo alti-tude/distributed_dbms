@@ -1,14 +1,9 @@
-import copy
 from DDBMS.RATree.Nodes import *
-
-def insertNodeBetween(parent, child_idx, insert_node):
-    new_child = parent.replaceChildById(child_idx, insert_node)
-    insert_node.replaceChildById(0, new_child)
-
 
 def optimizeProject(ra_tree, node):
     if isinstance(node, RelationNode):
-        return ra_tree.sql_query.filterCols(node.table)
+        print(ra_tree.sql_query.filterCols(table=node.table))
+        return ra_tree.sql_query.filterCols(table=node.table)
 
     node_children = node.children
     delete_cur_node = False
@@ -25,15 +20,12 @@ def optimizeProject(ra_tree, node):
                 child_cols = child.join_predicate.getAllColumns()
             new_project_cols = list(set(cols + child_cols))
 
-            new_node = node
             if new_project_cols == cols:
                 delete_cur_node = True
             
-            for i in range(len(children)):
-                if new_project_cols != cols:
-                    new_node = copy.deepcopy(node)
-                    new_node.columns = new_project_cols
-                insertNodeBetween(child, i, new_node)
+            for i, grandchild in enumerate(child.children):
+                new_node = ProjectNode(columns=new_project_cols, children=[grandchild])
+                child.replaceChildById(i, new_node)
 
         elif isinstance(child, ProjectNode):
             delete_cur_node = True
@@ -41,9 +33,9 @@ def optimizeProject(ra_tree, node):
         
         elif isinstance(child, UnionNode) or isinstance(child, CrossNode):
             delete_cur_node = True
-            for i in range in len(child.children):
-                new_node = copy.deepcopy(node)
-                insertNodeBetween(child, i, new_node)
+            for i, grandchild in enumerate(child.children):
+                new_node = ProjectNode(columns=cols, children=[grandchild])
+                child.replaceChildById(i, new_node)
 
     subtree_cols = []
     for child in node_children:

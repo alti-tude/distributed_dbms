@@ -1,6 +1,3 @@
-from typing import List
-
-from typing_extensions import TypeVarTuple
 from .Predicate import Predicate
 from .Column import Column
 from .Table import Table
@@ -46,7 +43,7 @@ class SQLQuery:
             self.having = [new_predicate]
         return self.having
 
-    def newTable(self, name, alias):
+    def newTable(self, name, alias=None):
         new_table = Table(name, alias)
         for old_table in self.tables:
             if repr(new_table) == repr(old_table):
