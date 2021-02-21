@@ -3,7 +3,23 @@ from .Column import Column
 from .Table import Table
 from .Symbols import *
 
-class SQLQuery:       
+class SQLQuery:
+    #TODO move this to a store object
+    INSTANCE = None
+
+    @classmethod
+    def get(cls):
+        if cls.INSTANCE is not None:
+            return cls.INSTANCE
+        
+        cls.INSTANCE = cls()
+        return cls.INSTANCE
+
+    @classmethod
+    def reset(cls):
+        cls.INSTANCE = cls()
+        return cls.INSTANCE
+
     def __init__(self):
         self.columns = []
         self.tables = []
@@ -15,6 +31,10 @@ class SQLQuery:
         self.having = []
 
     def addFrom(self, table):
+        for old_table in self.tables:
+            if table == old_table:
+                return
+        
         self.tables.append(table)
     
     def addSelectColumn(self, name : str, table : Table, alias = None, aggregation = Aggregation.NONE):
@@ -46,7 +66,7 @@ class SQLQuery:
     def newTable(self, name, alias=None):
         new_table = Table(name, alias)
         for old_table in self.tables:
-            if repr(new_table) == repr(old_table):
+            if new_table == old_table:
                 return old_table
         
         self.tables.append(new_table)
