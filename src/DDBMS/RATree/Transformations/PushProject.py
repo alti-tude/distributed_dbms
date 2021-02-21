@@ -2,7 +2,6 @@ from DDBMS.RATree.Nodes import *
 
 def optimizeProject(ra_tree, node):
     if isinstance(node, RelationNode):
-        print(ra_tree.sql_query.filterCols(table=node.table))
         return ra_tree.sql_query.filterCols(table=node.table)
 
     node_children = node.children

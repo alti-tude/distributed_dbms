@@ -27,31 +27,15 @@ from pprint import PrettyPrinter
 
 pp = PrettyPrinter(indent=2, compact=True)
 
-<<<<<<< HEAD
 query = "select * from Theater where Location!='Hyderabad' group by TheaterID;"
-=======
-query = "select * from Movie;"
->>>>>>> bbd2ba5d68f68fbb5b0c83b2a58daab67a0f6d35
 parser = SQLParser()
 sql_query = parser.parse(query)
 
 ra_tree = RATreeBuilder()
-<<<<<<< HEAD
 ra_tree.projected.to_dict()
 materialiseAllTables(ra_tree.projected).to_dict()
 moveUnionUp(ra_tree.projected).to_dict()
 pp.pprint(reduceHorizontalFrag(ra_tree.projected).to_dict())
-=======
-pp.pprint(ra_tree.projected.to_dict())
-# ra_tree = pushSelect(ra_tree)
-# pp.pprint(ra_tree.projected.to_dict())
-# ra_tree = pushProject(ra_tree)
-# pp.pprint(ra_tree.projected.to_dict())
-
-pp.pprint(materialiseAllTables(ra_tree.projected).to_dict())
-# pp.pprint(moveUnionUp(ra_tree.projected).to_dict())
-
->>>>>>> bbd2ba5d68f68fbb5b0c83b2a58daab67a0f6d35
 # from DDBMS.RATree.Optimisations import CombineSelectAndCross
 
 # CombineSelectAndCross(ra_tree)

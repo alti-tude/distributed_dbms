@@ -34,7 +34,6 @@ def seperateSelect(predicates : Union[List[Predicate], Predicate], cur_root) -> 
     return cur_node
 
 def crossNodes(nodes):
-    print(nodes)
     cur_node = nodes[0]
     for i in range(1, len(nodes)):
         cur_node = CrossNode(children=[cur_node, nodes[i]])
