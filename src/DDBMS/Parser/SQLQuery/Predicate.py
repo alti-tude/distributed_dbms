@@ -14,7 +14,7 @@ class Predicate(BasePrimitive):
             if isinstance(operand, Predicate):
                 columns.extend(operand.getAllColumns())
         
-        return columns
+        return list(set(columns))
 
     def to_dict(self):
         operand_dicts = []

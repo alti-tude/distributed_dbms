@@ -23,6 +23,3 @@ class Column(BasePrimitive):
         }
             
         return output
-    
-    def __eq__(self, o: object) -> bool:
-        return repr(self) == repr(o)

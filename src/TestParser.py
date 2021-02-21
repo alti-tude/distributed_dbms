@@ -29,9 +29,11 @@ sql_query = parser.parse(query)
 # print(sql_query)
 
 ra_tree = RATreeBuilder(sql_query)
-pp.pprint(ra_tree.projected.to_dict())
+# pp.pprint(ra_tree.projected.to_dict())
 ra_tree = pushSelect(ra_tree)
-pp.pprint(ra_tree.projected.to_dict())
+# pp.pprint(ra_tree.projected.to_dict())
+
+# pushProject(ra_tree)
 
 # from DDBMS.RATree.Optimisations import CombineSelectAndCross
 
