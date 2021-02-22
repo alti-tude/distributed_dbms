@@ -90,6 +90,8 @@ class SQLQuery:
             else:
                 operands.append(operand_dict)
 
+        #TODO recursively simplify NOT
+
         new_predicate = Predicate(operator = operator, operands = operands)
         for old_predicate in self.predicates:
             if repr(new_predicate) == repr(old_predicate):

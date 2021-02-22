@@ -1,18 +1,20 @@
-from DDBMS.Parser.SQLQuery.Column import Column
-from DDBMS.Parser.SQLQuery.Symbols import PredicateOps
-from DDBMS.Parser.SQLQuery import checkNonExclusivePredicate
-from DDBMS.RATree.Nodes import CrossNode, HorizontalFragNode, JoinNode, ProjectNode, RelationNode, SelectNode, Node, UnionNode
+from DDBMS.RATree.Nodes import CrossNode, HorizontalFragNode, JoinNode, ProjectNode, RelationNode, SelectNode, Node, UnionNode, VerticalFragNode
 
 
-def __checkFrag(frag : HorizontalFragNode) -> bool:
+def __checkFrag(frag : VerticalFragNode) -> bool:
     node = frag
     while node is not None and \
-        ( isinstance(node, ProjectNode) or isinstance(node, SelectNode) or isinstance(node, HorizontalFragNode)):
+        ( isinstance(node, ProjectNode) or isinstance(node, VerticalFragNode)):
 
-        if isinstance(node, SelectNode):
-            if not checkNonExclusivePredicate(node.predicate, frag.predicate):
+        if isinstance(node, ProjectNode):
+            #FIXME DONT PUSH DOWN SELECT FOR VERTICAL FRAG
+
+            #assuming no select pushdown 
+            #project will have join or another project as direct ancestor
+            #hence no point of projecting a column
+            if len(set(node.columns).intersection(set(frag.columns))) <= 1: 
                 return False
-        
+
         node = node.parent
 
     return True
@@ -28,7 +30,7 @@ def __deleteInvalidBranches(node : Node) -> bool:
         bool: [return True if delete branch]
     """
     
-    if isinstance(node, HorizontalFragNode):
+    if isinstance(node, VerticalFragNode):
         return not __checkFrag(node)
     
     if isinstance(node, RelationNode):
@@ -45,12 +47,12 @@ def __deleteInvalidBranches(node : Node) -> bool:
         node.deleteChild(child)
     
     #return false if not deletable
-    if not ( isinstance(node, ProjectNode) or isinstance(node, SelectNode) ):
+    if not ( isinstance(node, ProjectNode) ):
         return False
     
     return delete
 
-def reduceHorizontalFrag(node : Node) -> Node:
+def reduceVerticalFrag(node : Node) -> Node:
     if __deleteInvalidBranches(node):
         return None
 
