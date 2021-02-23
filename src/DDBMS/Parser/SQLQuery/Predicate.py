@@ -1,3 +1,4 @@
+from typing import List
 from DDBMS.Parser.SQLQuery.Symbols import PredicateOps
 from DDBMS.BasePrimitive import BasePrimitive
 from DDBMS.Parser.SQLQuery.Column import Column
@@ -6,7 +7,7 @@ from DDBMS.Parser.SQLQuery.Column import Column
 class Predicate(BasePrimitive):       
     def __init__(self, operator = None, operands = None):
         self.operator = operator
-        self.operands = operands
+        self.operands : List = operands
 
     def getAllColumns(self):
         columns = []

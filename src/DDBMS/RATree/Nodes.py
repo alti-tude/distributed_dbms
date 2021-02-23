@@ -199,7 +199,7 @@ class DerivedHorizontalFragNode(RelationNode):
         super().__init__(table, children)
         self.left_frag_name = left_frag_name
         self.right_frag_name = right_frag_name
-        self.join_predicate = join_predicate
+        self.join_predicate : Predicate= join_predicate
     
     def to_dict(self):
         return {
