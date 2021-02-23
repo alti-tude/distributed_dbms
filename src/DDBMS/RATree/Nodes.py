@@ -193,3 +193,20 @@ class VerticalFragNode(RelationNode):
                 "children": [child.to_dict() for child in self.children]
             }
         }
+
+class DerivedHorizontalFragNode(RelationNode):
+    def __init__(self, table: Table, left_frag_name, right_frag_name, join_predicate, children = []) -> None:
+        super().__init__(table, children)
+        self.left_frag_name = left_frag_name
+        self.right_frag_name = right_frag_name
+        self.join_predicate = join_predicate
+    
+    def to_dict(self):
+        return {
+            "DerivedHorizontalFragNode":{
+                "left_frag_name": self.left_frag_name,
+                "right_frag_name": self.right_frag_name,
+                "join_predicate": self.join_predicate.to_dict(),
+                "children": [child.to_dict() for child in self.children]
+            }
+        }

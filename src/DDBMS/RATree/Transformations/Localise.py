@@ -84,6 +84,52 @@ def joinVerticalFrags(node1, cols_1, node2, cols_2):
     
 #endregion
 
+#region DERIVED HORIZONTAL FRAG
+@db.execute
+def __getDerivedHorizontalFrags(relation_name):
+    #LeftFragmentID | LeftRelationName | LeftAttributeName | RightFragmentID | RightRelationName | RightAttributeName
+    return f"CALL getDerivedHorizontalFragments('{relation_name}')"
+
+
+def getRightHorizontalFragSelectNode(fragment_details, right_relation, right_relation_node):
+    horizontal_frag_details = __getHorizontalFrags(right_relation)
+    right_frag_predicate = horizontal_frag_details.loc[horizontal_frag_details['FragmentID'] == fragment_details['RightFragmentID']]['Predicate'].iloc[0]
+
+    dummy_query = f"select * from temp where {right_frag_predicate}".replace('"', "'")
+    right_frag_predicate_dict = moz_sql_parser.parse(dummy_query)[Keywords.WHERE]
+    right_frag_predicate_dict = SQLParser().parsePredicate(right_frag_predicate_dict)
+    right_frag_processed_predicate = SQLQuery.get().newPredicate(right_frag_predicate_dict)
+    
+    return seperateSelect(right_frag_processed_predicate, right_relation_node)
+
+
+def materialiseDerivedHorizontalFrag(fragment_details, table : Table):
+    right_relation = fragment_details['RightRelationName']
+    right_relation_table = SQLQuery.get().newTable(name=right_relation)
+    right_relation_node = RelationNode(right_relation_table)
+    right_frag_select_node = getRightHorizontalFragSelectNode(fragment_details, right_relation, right_relation_node)
+
+    left_relation_node = RelationNode(table)
+    left_col = SQLQuery.get().newColumn(name=fragment_details['LeftAttributeName'],
+                                        table=table)
+    right_col = SQLQuery.get().newColumn(name=fragment_details['RightAttributeName'],
+                                         table=right_relation_table)
+
+    join_predicate_dict = {PredicateOps.EQ : [left_col, right_col]}
+    processed_join_predicate = SQLQuery.get().newPredicate(join_predicate_dict)
+    join_node = JoinNode(processed_join_predicate, children=[left_relation_node, right_frag_select_node])
+
+    left_relation_cols = SQLQuery.get().filterCols(table=table)
+    project_node = ProjectNode(columns=left_relation_cols, children=[join_node])
+
+    return DerivedHorizontalFragNode(table=table,
+                                     left_frag_name=fragment_details['LeftFragmentID'],
+                                     right_frag_name=fragment_details['RightFragmentID'],
+                                     join_predicate=processed_join_predicate,
+                                     children=[project_node])
+
+#endregion
+
 
 def materialiseTable(table : Table):
     frag_types : DataFrame = __getFragments(table.name)
@@ -114,6 +160,15 @@ def materialiseTable(table : Table):
             cur_cols = list(set(cur_cols + new_cols))
 
         return cur_node
+    
+    elif frag_types.iloc[0]['FragmentationType'] == 'D':
+        frags = []
+        frag_details : DataFrame = __getDerivedHorizontalFrags(table.name)
+        for idx, frag_detail in frag_details.iterrows():
+            frags.append(materialiseDerivedHorizontalFrag(frag_detail, table))
+
+        return UnionNode(children=frags)
+
 
 def materialiseAllTables(node : Node):
     if isinstance(node, RelationNode):
