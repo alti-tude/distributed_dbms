@@ -30,14 +30,16 @@ def __pullUp(union : UnionNode) -> Tuple[bool, Node]:
     elif isinstance(parent, CrossNode):
         for child in union.children:
             union_idx = parent.getChildId(union)
-            new_node = CrossNode(children=deepcopy(parent.children))
+            #FIXME copy subtree funtion
+            #       should take care of setting parents etc properly
+            new_node = parent.copy()
             new_node.replaceChildById(union_idx, child)
             new_nodes.append(new_node)
 
     elif isinstance(parent, JoinNode):
         for child in union.children:
             union_idx = parent.getChildId(union)
-            new_node = JoinNode(join_predicate=parent.join_predicate, children=deepcopy(parent.children))
+            new_node = parent.copy()
             new_node.replaceChildById(union_idx, child)
             new_nodes.append(new_node)
 
@@ -62,15 +64,14 @@ def __pullUp(union : UnionNode) -> Tuple[bool, Node]:
 def __moveUnionUpStep(root : Node) -> Tuple[bool, Node]:
     unions = __getAllUnions(root)
 
-    is_pulled = False
     for union in unions:
         pulled, new_root = __pullUp(union)
         if new_root is not None:
             root = new_root
         
-        is_pulled = is_pulled or pulled
+        if pulled: return True, root
     
-    return is_pulled, root
+    return False, root
 
 def moveUnionUp(root : Node) -> Node:
     is_pulled, root = __moveUnionUpStep(root)

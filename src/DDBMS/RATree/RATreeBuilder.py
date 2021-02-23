@@ -78,7 +78,7 @@ class RATreeBuilder:
 
         self.gamma_added = addGroupby(self.sql_query.groupby, self.project_before_groupby)
         self.having_added = seperateSelect(self.sql_query.having, self.gamma_added)
-        self.projected = ProjectNode(columns=self.sql_query.select, children=[self.having_added])
+        self.projected = FinalProjectNode(columns=self.sql_query.select, children=[self.having_added])
 
     def __repr__(self):
         return str(self.projected)

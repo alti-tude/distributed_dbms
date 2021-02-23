@@ -1,10 +1,11 @@
+from DDBMS.Parser.SQLQuery import SQLQuery
 from DDBMS.Parser.SQLQuery.Symbols import Aggregation
 from DDBMS.RATree.RATreeBuilder import RATreeBuilder
 from DDBMS.RATree.Nodes import *
 
-def optimizeProject(ra_tree : RATreeBuilder, node):
+def optimizeProject(node):
     if isinstance(node, RelationNode):
-        return ra_tree.sql_query.filterCols(table=node.table, aggregation=Aggregation.NONE)
+        return SQLQuery.get().filterCols(table=node.table, aggregation=Aggregation.NONE)
 
     node_children = node.children
     delete_cur_node = False
@@ -40,19 +41,22 @@ def optimizeProject(ra_tree : RATreeBuilder, node):
 
     subtree_cols = []
     for child in node_children:
-        subtree_cols += optimizeProject(ra_tree, child)
+        subtree_cols += optimizeProject(child)
     
+    if isinstance(node, GroupbyNode):
+        return list(set(subtree_cols + node.group_by_columns))
+        
     if not delete_cur_node and isinstance(node, ProjectNode):
         subtree_cols = list(set(node.columns).intersection(subtree_cols))
         node.columns = subtree_cols
 
     if delete_cur_node or (isinstance(node, ProjectNode) and len(subtree_cols) == 0):
-        node.parent.replaceChild(node, node.children[0])
+        if node.parent is None:
+            node.parent.replaceChild(node, node.children[0])
 
     return subtree_cols
 
 
-def pushProject(ra_tree):
-    main_project_node = ra_tree.project_before_groupby
-    optimizeProject(ra_tree, main_project_node)
-    return ra_tree
+def pushProject(root):
+    optimizeProject(root)
+    return root

@@ -16,6 +16,6 @@ def __recursiveCombine(cur_node : Node):
             new_node = JoinNode(cur_node.predicate, children=child.children)
             parent.replaceChild(cur_node, new_node)
 
-def CombineSelectAndCross(tree_builder : RATreeBuilder):
-    root = tree_builder.project_before_groupby
+def CombineSelectAndCross(root):
     __recursiveCombine(root)
+    return root

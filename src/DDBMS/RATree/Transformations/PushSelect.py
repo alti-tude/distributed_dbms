@@ -53,10 +53,10 @@ def insertSelect(parent, child_idx, select_node):
     select_node.replaceChildById(0, old_child)
 
 
-def pushSelect(ra_tree):
-    select_nodes = getSelectNodes(ra_tree.projected)
+def pushSelect(root):
+    select_nodes = getSelectNodes(root)
     if len(select_nodes) == 0:
-        return ra_tree
+        return root
 
     for select_node in select_nodes:
         select_node_cols = select_node.predicate.getAllColumns()
@@ -70,4 +70,4 @@ def pushSelect(ra_tree):
                 for i in range(len(parent.children)):
                     insertSelect(parent, i, select_node)
     
-    return ra_tree
+    return root

@@ -1,7 +1,9 @@
+from copy import copy, deepcopy
 from DDBMS.BasePrimitive import BasePrimitive
 from typing import List
 from DDBMS.Parser.SQLQuery import Column, Table, Predicate
 from abc import ABC, abstractmethod
+from treelib import Tree
 
 class Node(BasePrimitive):
     def __init__(self, *, children = []) -> None:
@@ -35,7 +37,7 @@ class Node(BasePrimitive):
 
     def replaceChild(self, old_child, new_child):
         idx = self.getChildId(old_child)
-        assert idx != -1, f"Can't replace {old_child}: child does not exist"
+        assert idx != -1, f"Can't replace {type(old_child)}: child does not exist"
         return self.replaceChildById(idx, new_child)
 
     def deleteChild(self, child):
@@ -57,7 +59,24 @@ class Node(BasePrimitive):
 
         return output
 
+    def copy(self):
+        # cls = type(self)
+        new_obj : Node = copy(self)
+        new_obj.children = []
+        for child in self.children:
+            new_obj.addChild(child.copy())
+        return new_obj
+    
+    def to_treelib(self, tree : Tree):
+        tree.create_node(
+            tag = f"{type(self)}", 
+            identifier=str(id(self)), 
+            parent=str(id(self.parent)) if self.parent is not None else None
+        )
 
+        for child in self.children:
+            child.to_treelib(tree)
+    
 class SelectNode(Node):
     def __init__(self, *, predicate, children = []) -> None:
         super().__init__(children=children)
@@ -80,6 +99,20 @@ class ProjectNode(Node):
     def to_dict(self):
         output = {
             'Project':{
+                'columns': [column.to_dict() for column in self.columns],
+                'children': [child.to_dict() for child in self.children]
+            }
+        }
+        return output
+
+class FinalProjectNode(Node):
+    def __init__(self, *, columns : List[Column], children=[]) -> None:
+        super().__init__(children=children)
+        self.columns = columns
+    
+    def to_dict(self):
+        output = {
+            'FinalProject':{
                 'columns': [column.to_dict() for column in self.columns],
                 'children': [child.to_dict() for child in self.children]
             }
@@ -199,7 +232,7 @@ class DerivedHorizontalFragNode(RelationNode):
         super().__init__(table, children)
         self.left_frag_name = left_frag_name
         self.right_frag_name = right_frag_name
-        self.join_predicate : Predicate= join_predicate
+        self.join_predicate : Predicate = join_predicate
     
     def to_dict(self):
         return {
