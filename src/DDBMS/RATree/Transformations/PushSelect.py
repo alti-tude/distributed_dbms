@@ -1,6 +1,9 @@
 from DDBMS.RATree.Nodes import *
 
 def getSelectNodes(node):
+    if isinstance(node, RelationNode):
+        return []
+        
     select_nodes = []
     if isinstance(node, SelectNode):
         select_nodes.append(node)
@@ -55,8 +58,6 @@ def insertSelect(parent, child_idx, select_node):
 
 def pushSelect(root):
     select_nodes = getSelectNodes(root)
-    if len(select_nodes) == 0:
-        return root
 
     for select_node in select_nodes:
         select_node_cols = select_node.predicate.getAllColumns()
