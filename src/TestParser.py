@@ -16,6 +16,7 @@
 # print(getPredicateObj(predicate))
 
 
+from DDBMS.RATree.Transformations.reduceVerticalFrag import reduceVerticalFrag
 from DDBMS.RATree.Transformations.CombineSelectAndCross import CombineSelectAndCross
 from DDBMS.RATree.Transformations.reduceHorizontalFrag import reduceHorizontalFrag
 from DDBMS.RATree.Transformations.reduceDerivedHorizontalFrag import reduceDerivedHorizontalFrag
@@ -37,14 +38,36 @@ sql_query = parser.parse(query)
 
 ra_tree = RATreeBuilder()
 root = pushSelect(ra_tree.projected)
+print("="*20)
 root = CombineSelectAndCross(root)
 root = pushProject(root)
 root = materialiseAllTables(root)
-# root = pushSelect(root)
-# root = moveUnionUp(root)
+root = moveUnionUp(root)
+root = pushSelect(root)
+root = reduceHorizontalFrag(root)
 # root = pushProject(root)
-# root = reduceHorizontalFrag(root)
-# root = reduceDerivedHorizontalFrag(root)
+root = reduceDerivedHorizontalFrag(root)
+tree = Tree()
+root.to_treelib(tree)
+tree.show()
+
+SQLQuery.reset()
+query = "select Genre from Movie;"
+parser = SQLParser()
+sql_query = parser.parse(query)
+
+print("="*20)
+ra_tree = RATreeBuilder()
+root = pushSelect(ra_tree.projected)
+root = CombineSelectAndCross(root)
+root = materialiseAllTables(root)
+root = pushProject(root)
+root = reduceVerticalFrag(root)
+root = moveUnionUp(root)
+root = pushSelect(root)
+root = reduceHorizontalFrag(root)
+root = pushProject(root)
+root = reduceDerivedHorizontalFrag(root)
 tree = Tree()
 root.to_treelib(tree)
 tree.show()

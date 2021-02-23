@@ -47,7 +47,10 @@ def __deleteInvalidBranches(node : Node) -> bool:
         node.deleteChild(child)
     
     #return false if not deletable
-    if not ( isinstance(node, ProjectNode) ):
+    if isinstance(node, JoinNode) and delete:
+        node.parent.replaceChild(node, node.children[0])
+
+    if not ( isinstance(node, ProjectNode)):
         return False
     
     return delete

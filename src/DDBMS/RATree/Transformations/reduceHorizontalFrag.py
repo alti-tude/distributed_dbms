@@ -1,3 +1,4 @@
+from DDBMS.RATree.RATreeBuilder import crossNodes
 from DDBMS.Parser.SQLQuery.Column import Column
 from DDBMS.Parser.SQLQuery.Symbols import PredicateOps
 from DDBMS.Parser.SQLQuery import checkNonExclusivePredicate
@@ -45,7 +46,7 @@ def __deleteInvalidBranches(node : Node) -> bool:
         node.deleteChild(child)
     
     #return false if not deletable
-    if not ( isinstance(node, ProjectNode) or isinstance(node, SelectNode) ):
+    if not ( isinstance(node, ProjectNode) or isinstance(node, SelectNode) or isinstance(node, CrossNode) or isinstance(node, JoinNode)):
         return False
     
     return delete

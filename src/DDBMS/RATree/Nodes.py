@@ -67,11 +67,11 @@ class Node(BasePrimitive):
             new_obj.addChild(child.copy())
         return new_obj
     
-    def to_treelib(self, tree : Tree):
+    def to_treelib(self, tree : Tree, is_root=False):
         tree.create_node(
             tag = f"{type(self)}", 
             identifier=str(id(self)), 
-            parent=str(id(self.parent)) if self.parent is not None else None
+            parent=str(id(self.parent)) if self.parent is not None and not is_root else None
         )
 
         for child in self.children:

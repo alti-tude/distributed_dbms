@@ -3,7 +3,7 @@ from DDBMS.RATree.Nodes import *
 def getSelectNodes(node):
     if isinstance(node, RelationNode):
         return []
-        
+
     select_nodes = []
     if isinstance(node, SelectNode):
         select_nodes.append(node)
@@ -51,9 +51,10 @@ def getNewParent(select_cols, node):
     
 
 def insertSelect(parent, child_idx, select_node):
-    select_node.parent.replaceChild(select_node, select_node.children[0])
-    old_child = parent.replaceChildById(child_idx, select_node)
-    select_node.replaceChildById(0, old_child)
+    #  select_node.parent.replaceChild(select_node, select_node.children[0])
+    select_node_copy = select_node.copy()
+    old_child = parent.replaceChildById(child_idx, select_node_copy)
+    select_node_copy.replaceChildById(0, old_child)
 
 
 def pushSelect(root):
@@ -62,9 +63,9 @@ def pushSelect(root):
     for select_node in select_nodes:
         select_node_cols = select_node.predicate.getAllColumns()
         parent_detail = getNewParent(select_node_cols, select_node)
-
         if parent_detail is not None:
             parent, child_idx = parent_detail
+            select_node.parent.replaceChild(select_node, select_node.children[0])
             if child_idx != -1:
                 insertSelect(parent, child_idx, select_node)
             else:
