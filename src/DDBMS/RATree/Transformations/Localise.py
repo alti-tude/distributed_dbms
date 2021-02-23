@@ -1,5 +1,5 @@
 from pandas.core.frame import DataFrame
-from DDBMS.Parser.SQLQuery.Symbols import Keywords, PredicateOps
+from DDBMS.Parser.SQLQuery.Symbols import Aggregation, Keywords, PredicateOps
 from DDBMS.Parser.SQLQuery.SQLQuery import SQLQuery
 from DDBMS.Parser.SQLQuery.Column import Column
 from DDBMS.RATree.RATreeBuilder import RATreeBuilder, seperateSelect
@@ -119,7 +119,7 @@ def materialiseDerivedHorizontalFrag(fragment_details, table : Table):
     processed_join_predicate = SQLQuery.get().newPredicate(join_predicate_dict)
     join_node = JoinNode(processed_join_predicate, children=[left_relation_node, right_frag_select_node])
 
-    left_relation_cols = SQLQuery.get().filterCols(table=table)
+    left_relation_cols = SQLQuery.get().filterCols(table=table, aggregation=Aggregation.NONE)
     project_node = ProjectNode(columns=left_relation_cols, children=[join_node])
 
     return DerivedHorizontalFragNode(table=table,

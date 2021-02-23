@@ -1,8 +1,10 @@
+from DDBMS.Parser.SQLQuery.Symbols import Aggregation
+from DDBMS.RATree.RATreeBuilder import RATreeBuilder
 from DDBMS.RATree.Nodes import *
 
-def optimizeProject(ra_tree, node):
+def optimizeProject(ra_tree : RATreeBuilder, node):
     if isinstance(node, RelationNode):
-        return ra_tree.sql_query.filterCols(table=node.table)
+        return ra_tree.sql_query.filterCols(table=node.table, aggregation=Aggregation.NONE)
 
     node_children = node.children
     delete_cur_node = False

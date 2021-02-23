@@ -27,7 +27,7 @@ from pprint import PrettyPrinter
 
 pp = PrettyPrinter(indent=2, compact=True)
 
-query = "select ScreenID from Screen;"
+query = "select max(ScreenID) from Screen group by ScreenID;"
 parser = SQLParser()
 sql_query = parser.parse(query)
 
