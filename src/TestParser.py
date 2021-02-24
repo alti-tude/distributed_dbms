@@ -93,12 +93,14 @@ while True:
         root = pushSelect(ra_tree.projected)
         root = CombineSelectAndCross(root)
         root = pushProject(root)
+
+        #? Materialise handles reduce vertical
         root = materialiseAllTables(root)
 
-        # #TODO show tree
         tree = Tree()
         root.to_treelib(tree)
         tree.show()
+        
         root = pushSelect(root)
         root = pushProject(root)
         root = moveUnionUp(root)
@@ -107,7 +109,10 @@ while True:
         root = pushSelect(root)
         root = pushProject(root)
         root = reduceDerivedHorizontalFrag(root)
-        # #TODO show tree
+
+        root = pushSelect(root)
+        root = pushProject(root)
+        
         tree = Tree()
         root.to_treelib(tree)
         tree.show()
