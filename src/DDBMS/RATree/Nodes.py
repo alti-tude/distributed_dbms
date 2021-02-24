@@ -69,7 +69,7 @@ class Node(BasePrimitive):
     
     def to_treelib(self, tree : Tree, is_root=False):
         tree.create_node(
-            tag = f"{type(self)}", 
+            tag = f"{self.compact_display()}", 
             identifier=str(id(self)), 
             parent=str(id(self.parent)) if self.parent is not None and not is_root else None
         )
