@@ -8,12 +8,21 @@ from DDBMS.RATree.Nodes import CrossNode, DerivedHorizontalFragNode, HorizontalF
 def __checkFrag(frag : DerivedHorizontalFragNode) -> bool:
     node = frag
     
+    while isinstance(node.parent, (SelectNode, ProjectNode)):
+        node = node.parent
+
     if isinstance(node.parent, JoinNode):
-        idx = node.parent.getChildId(node)
+        parent = node.parent
+
+        idx = parent.getChildId(node)
         other_idx = 1-idx
-        sibbling = node.parent[other_idx]
-        if isinstance(sibbling, HorizontalFragNode) and node.parent.join_predicate == node.join_predicate:
-            if node.right_frag_name != sibbling.name:
+        sibbling = parent.children[other_idx]
+
+        while isinstance(sibbling, (SelectNode, ProjectNode)):
+            sibbling = sibbling.children[0]
+
+        if isinstance(sibbling, HorizontalFragNode) and parent.join_predicate == frag.join_predicate:
+            if frag.right_frag_name != sibbling.name:
                 return False
 
     return True
@@ -29,12 +38,9 @@ def __deleteInvalidBranches(node : Node) -> bool:
         bool: [return True if delete branch]
     """
     
-    if isinstance(node, JoinNode):
-        if isinstance(node.children[0], DerivedHorizontalFragNode):
-            return not __checkFrag(node.children[0])
-        if isinstance(node.children[1], DerivedHorizontalFragNode):
-            return not __checkFrag(node.children[1])
-    
+    if isinstance(node, DerivedHorizontalFragNode):
+        return not __checkFrag(node)
+
     to_delete = []
     delete = False
     for child in node.children:

@@ -94,17 +94,20 @@ while True:
         root = CombineSelectAndCross(root)
         root = pushProject(root)
         root = materialiseAllTables(root)
-        
-        #TODO show tree
+
+        # #TODO show tree
+        tree = Tree()
+        root.to_treelib(tree)
+        tree.show()
         root = pushSelect(root)
         root = pushProject(root)
         root = moveUnionUp(root)
         root = reduceHorizontalFrag(root)
 
-        root = pushProject(root)
         root = pushSelect(root)
+        root = pushProject(root)
         root = reduceDerivedHorizontalFrag(root)
-        #TODO show tree
+        # #TODO show tree
         tree = Tree()
         root.to_treelib(tree)
         tree.show()

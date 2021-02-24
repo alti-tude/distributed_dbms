@@ -51,8 +51,7 @@ def optimizeProject(node):
         node.columns = subtree_cols
 
     if delete_cur_node or (isinstance(node, ProjectNode) and len(subtree_cols) == 0):
-        if node.parent is None:
-            node.parent.replaceChild(node, node.children[0])
+        node.parent.replaceChild(node, node.children[0])
 
     return subtree_cols
 
