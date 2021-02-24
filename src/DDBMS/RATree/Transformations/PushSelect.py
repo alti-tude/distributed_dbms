@@ -34,7 +34,7 @@ def getNewParent(select_cols, node):
             deeper_new_parent = possible_deeper_new_parent
             insert_child_idx = idx
     
-    if push_select_down and deeper_new_parent != None:
+    if push_select_down and deeper_new_parent is not None:
         if deeper_new_parent != True:
             return deeper_new_parent
         elif isinstance(node, JoinNode) or isinstance(node, CrossNode):
@@ -62,8 +62,9 @@ def pushSelect(root):
 
     for select_node in select_nodes:
         select_node_cols = select_node.predicate.getAllColumns()
-        parent_detail = getNewParent(select_node_cols, select_node)
-        if parent_detail is not None:
+        parent_detail = getNewParent(select_node_cols, select_node.children[0])
+
+        if isinstance(parent_detail, tuple):
             parent, child_idx = parent_detail
             select_node.parent.replaceChild(select_node, select_node.children[0])
             if child_idx != -1:

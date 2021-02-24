@@ -33,54 +33,10 @@ import traceback
 pp = PrettyPrinter(indent=2, compact=True)
 
 query = "select ScreenID from Screen, Theater where Screen.TheaterID = Theater.TheaterID and Theater.Location = 'Delhi';"
-parser = SQLParser()
-sql_query = parser.parse(query)
-
-ra_tree = RATreeBuilder()
-root = pushSelect(ra_tree.projected)
-print("="*20)
-root = CombineSelectAndCross(root)
-root = pushProject(root)
-root = materialiseAllTables(root)
-root = moveUnionUp(root)
-root = pushSelect(root)
-root = reduceHorizontalFrag(root)
-# root = pushProject(root)
-root = reduceDerivedHorizontalFrag(root)
-tree = Tree()
-root.to_treelib(tree)
-tree.show()
-
-SQLQuery.reset()
-query = "select count(MovieID) from Movie;"
-parser = SQLParser()
-sql_query = parser.parse(query)
-
-print("="*20)
-ra_tree = RATreeBuilder()
-root = pushSelect(ra_tree.projected)
-root = CombineSelectAndCross(root)
-root = pushProject(root)
-tree = Tree()
-root.to_treelib(tree)
-tree.show()
-root = materialiseAllTables(root)
-root = pushProject(root)
-
-root = moveUnionUp(root)
-root = pushSelect(root)
-root = reduceHorizontalFrag(root)
-tree = Tree()
-root.to_treelib(tree)
-tree.show()
-
-root = pushProject(root)
-root = reduceDerivedHorizontalFrag(root)
-tree = Tree()
-root.to_treelib(tree)
-tree.show()
+query = "select TheaterID from Screen where TheaterID=1;"
 
 while True:
+    
     query = input("> ")
 
     SQLQuery.reset()
@@ -90,6 +46,10 @@ while True:
         parser.parse(query)
 
         ra_tree = RATreeBuilder()
+        root = ra_tree.projected
+        tree = Tree()
+        root.to_treelib(tree)
+        tree.show()
         root = pushSelect(ra_tree.projected)
         root = CombineSelectAndCross(root)
         root = pushProject(root)
@@ -120,4 +80,5 @@ while True:
         if Config.DEBUG:
             traceback.print_exc()
         print("An exception has occured. Please verify the query.")
+
 
