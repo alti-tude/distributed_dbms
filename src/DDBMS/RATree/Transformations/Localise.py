@@ -131,7 +131,8 @@ def materialiseDerivedHorizontalFrag(fragment_details, table : Table):
 #endregion
 
 
-def materialiseTable(table : Table):
+def materialiseTable(node : RelationNode):
+    table = node.table
     frag_types : DataFrame = __getFragments(table.name)
 
     if frag_types.iloc[0]['FragmentationType'] == 'H':
@@ -145,12 +146,26 @@ def materialiseTable(table : Table):
     elif frag_types.iloc[0]['FragmentationType'] == 'V':
         frag_details : DataFrame = __getVerticalFrags(table.name)
         frag_names = frag_details['FragmentID'].unique()
-        frags = []
+        frags : List[VerticalFragNode]= []
 
         for frag_name in frag_names:
             frag_detail = frag_details.loc[frag_details['FragmentID'] == frag_name]
             frags.append(materialiseVerticalFrag(frag_name, frag_detail['AttributeName'], table))
 
+        if isinstance(node.parent, ProjectNode):
+            required_columns = [set(node.parent.columns).intersection(set(frag.columns)) for frag in frags]
+            frag_selection_mask = [True for _ in frags]
+
+            for i, ireq_col in enumerate(required_columns):
+                for j in range(i+1, len(required_columns)):
+                    jreq_col = required_columns[j]
+                    if len(ireq_col) >= len(jreq_col) and len(ireq_col.intersection(jreq_col)) >= len(jreq_col):
+                        frag_selection_mask[j] = False
+                    elif len(jreq_col) >= len(ireq_col) and len(ireq_col.intersection(jreq_col)) >= len(ireq_col):
+                        frag_selection_mask[i] = False
+
+            frags = [frag for i, frag in enumerate(frags) if frag_selection_mask[i]]
+            
         cur_node = frags[0]
         cur_cols = cur_node.columns
         for i in range(1, len(frags)):
@@ -172,7 +187,7 @@ def materialiseTable(table : Table):
 
 def materialiseAllTables(node : Node):
     if isinstance(node, RelationNode):
-        new_node = materialiseTable(node.table)
+        new_node = materialiseTable(node)
         parent : Node = node.parent
         if parent is None:
             new_node.makeRoot()

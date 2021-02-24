@@ -14,3 +14,5 @@ SERVER_DB_CONFIG = {
 }
 
 ConfigToUse = LOCAL_DB_CONFIG
+
+DEBUG = True

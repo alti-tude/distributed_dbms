@@ -6,6 +6,9 @@ class BasePrimitive(abc.ABC):
     def to_dict(self):
         return {}
     
+    def compact_display(self):
+        return ""
+        
     def __repr__(self) -> str:
         return str(self.to_dict())
 

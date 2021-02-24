@@ -149,7 +149,7 @@ class UnionNode(Node):
 class JoinNode(Node):
     def __init__(self, join_predicate, children = []) -> None:
         super().__init__(children=children)
-        self.join_predicate = join_predicate
+        self.join_predicate : Predicate= join_predicate
 
     def to_dict(self):
         output = {

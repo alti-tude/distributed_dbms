@@ -16,7 +16,6 @@
 # print(getPredicateObj(predicate))
 
 
-from DDBMS.RATree.Transformations.reduceVerticalFrag import reduceVerticalFrag
 from DDBMS.RATree.Transformations.CombineSelectAndCross import CombineSelectAndCross
 from DDBMS.RATree.Transformations.reduceHorizontalFrag import reduceHorizontalFrag
 from DDBMS.RATree.Transformations.reduceDerivedHorizontalFrag import reduceDerivedHorizontalFrag
@@ -27,8 +26,9 @@ from DDBMS.RATree.Transformations.PushSelect import pushSelect
 from DDBMS.Parser.SQLParser import *
 from DDBMS.RATree import RATreeBuilder
 from pprint import PrettyPrinter 
-
+import Config
 from treelib import Tree
+import traceback
 
 pp = PrettyPrinter(indent=2, compact=True)
 
@@ -52,7 +52,7 @@ root.to_treelib(tree)
 tree.show()
 
 SQLQuery.reset()
-query = "select Genre from Movie;"
+query = "select count(MovieID) from Movie;"
 parser = SQLParser()
 sql_query = parser.parse(query)
 
@@ -60,21 +60,56 @@ print("="*20)
 ra_tree = RATreeBuilder()
 root = pushSelect(ra_tree.projected)
 root = CombineSelectAndCross(root)
+root = pushProject(root)
+tree = Tree()
+root.to_treelib(tree)
+tree.show()
 root = materialiseAllTables(root)
 root = pushProject(root)
-root = reduceVerticalFrag(root)
+
 root = moveUnionUp(root)
 root = pushSelect(root)
 root = reduceHorizontalFrag(root)
+tree = Tree()
+root.to_treelib(tree)
+tree.show()
+
 root = pushProject(root)
 root = reduceDerivedHorizontalFrag(root)
 tree = Tree()
 root.to_treelib(tree)
 tree.show()
-# pp.pprint(ra_tree.projected.to_dict())
-# pp.pprint(reduceHorizontalFrag(ra_tree.projected).to_dict())
-# from DDBMS.RATree.Optimisations import CombineSelectAndCross
 
-# CombineSelectAndCross(ra_tree)
+while True:
+    query = input("> ")
 
-# pp.pprint(ra_tree.projected.to_dict())
+    SQLQuery.reset()
+    parser = SQLParser()
+    
+    try:
+        parser.parse(query)
+
+        ra_tree = RATreeBuilder()
+        root = pushSelect(ra_tree.projected)
+        root = CombineSelectAndCross(root)
+        root = pushProject(root)
+        root = materialiseAllTables(root)
+        
+        #TODO show tree
+        root = pushSelect(root)
+        root = pushProject(root)
+        root = moveUnionUp(root)
+        root = reduceHorizontalFrag(root)
+
+        root = pushProject(root)
+        root = pushSelect(root)
+        root = reduceDerivedHorizontalFrag(root)
+        #TODO show tree
+        tree = Tree()
+        root.to_treelib(tree)
+        tree.show()
+    except Exception as e:
+        if Config.DEBUG:
+            traceback.print_exc()
+        print("An exception has occured. Please verify the query.")
+
