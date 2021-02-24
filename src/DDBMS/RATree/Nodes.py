@@ -90,6 +90,9 @@ class SelectNode(Node):
             }
         }
         return output
+    
+    def compact_display(self):
+        return "SELECT: " + self.predicate.compact_display()
 
 class ProjectNode(Node):
     def __init__(self, *, columns : List[Column], children=[]) -> None:
@@ -104,6 +107,16 @@ class ProjectNode(Node):
             }
         }
         return output
+    
+    def compact_display(self):
+        columns_str = ""
+        for column in self.columns:
+            if columns_str != "":
+                columns_str += ", "
+            columns_str += column.compact_display()
+
+        return "PROJECT: " + columns_str
+
 
 class FinalProjectNode(Node):
     def __init__(self, *, columns : List[Column], children=[]) -> None:
@@ -118,6 +131,15 @@ class FinalProjectNode(Node):
             }
         }
         return output
+    
+    def compact_display(self):
+        columns_str = ""
+        for column in self.columns:
+            if columns_str != "":
+                columns_str += ", "
+            columns_str += column.compact_display()
+
+        return "FINAL PROJECT: " + columns_str
 
 class GroupbyNode(Node):
     def __init__(self, *, group_by_columns : List[Column], children = []) -> None:
@@ -134,6 +156,16 @@ class GroupbyNode(Node):
         
         return output
 
+    def compact_display(self):
+        columns_str = ""
+        for column in self.group_by_columns:
+            if columns_str != "":
+                columns_str += ", "
+            columns_str += column.compact_display()
+
+        return "GROUP BY: " + columns_str
+
+
 class UnionNode(Node):
     def __init__(self, *, children = []) -> None:
         super().__init__(children=children)
@@ -145,6 +177,9 @@ class UnionNode(Node):
             }
         }
         return output
+    
+    def compact_display(self):
+        return "UNION"
 
 class JoinNode(Node):
     def __init__(self, join_predicate, children = []) -> None:
@@ -160,6 +195,10 @@ class JoinNode(Node):
         }
         
         return output
+    
+    def compact_display(self):
+        return "JOIN: " + self.join_predicate.compact_display()
+
 
 class CrossNode(Node):
     def __init__(self, *, children = []) -> None:
@@ -173,6 +212,9 @@ class CrossNode(Node):
         }
         
         return output
+    
+    def compact_display(self):
+        return "CROSS"
 
 class RelationNode(Node):
     def __init__(self, table : Table, children = []) -> None:
@@ -194,6 +236,9 @@ class RelationNode(Node):
             return self.table == o
         
         return super().__eq__(o)
+    
+    def compact_display(self):
+        return "RELATION: " + self.table.compact_display()
 
 class HorizontalFragNode(RelationNode):
     def __init__(self, name, table: Table, predicate : Predicate, children = []) -> None:
@@ -210,6 +255,9 @@ class HorizontalFragNode(RelationNode):
                 "children": [child.to_dict() for child in self.children]
             }
         }
+    
+    def compact_display(self):
+        return "HORIZONTAL FRAGMENT: " + self.name
 
 class VerticalFragNode(RelationNode):
     def __init__(self, name, table: Table, columns = [], children = []) -> None:
@@ -227,6 +275,9 @@ class VerticalFragNode(RelationNode):
             }
         }
 
+    def compact_display(self):
+        return "VERTICAL FRAGMENT: " + self.name
+
 class DerivedHorizontalFragNode(RelationNode):
     def __init__(self, table: Table, left_frag_name, right_frag_name, join_predicate, children = []) -> None:
         super().__init__(table, children)
@@ -243,3 +294,6 @@ class DerivedHorizontalFragNode(RelationNode):
                 "children": [child.to_dict() for child in self.children]
             }
         }
+    
+    def compact_display(self):
+        return "DERIVED HORIZONTAL FRAGMENT: " + self.left_frag_name

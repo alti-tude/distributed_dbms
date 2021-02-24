@@ -21,3 +21,8 @@ class Table(BasePrimitive):
     
     def __eq__(self, o: object) -> bool:
         return repr(self) == repr(o)
+    
+    def compact_display(self):
+        if self.name != self.alias:
+            return self.name + " as " + self.alias
+        return self.name

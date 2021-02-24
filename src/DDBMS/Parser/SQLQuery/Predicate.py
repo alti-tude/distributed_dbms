@@ -19,6 +19,19 @@ class Predicate(BasePrimitive):
         
         return list(set(columns))
 
+    def compact_display(self):
+        compact_str = "("
+        for operand in self.operands:
+            if compact_str != "(":
+                compact_str += " " + self.operator + ' '
+            if not isinstance(operand, Predicate) and \
+               not isinstance(operand, Column):
+               compact_str += str(operand)
+            else:
+                compact_str += operand.compact_display()
+
+        return compact_str + ')'
+
     def to_dict(self):
         operand_dicts = []
         for operand in self.operands:

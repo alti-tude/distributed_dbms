@@ -23,3 +23,21 @@ class Column(BasePrimitive):
         }
             
         return output
+    
+    def compact_display(self):
+        compact_str = ""
+        
+        if self.aggregation != Aggregation.NONE:
+            compact_str += self.aggregation + '('
+        
+        compact_str += self.table.alias + '.'
+        compact_str += self.name
+        if self.aggregation != Aggregation.NONE:
+            compact_str += ')'
+        
+        if self.alias != self.name:
+            compact_str += " as " + self.alias
+        
+        return compact_str
+
+
