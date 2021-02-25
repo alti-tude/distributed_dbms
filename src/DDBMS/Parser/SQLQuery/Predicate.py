@@ -50,6 +50,13 @@ class Predicate(BasePrimitive):
         return output
 
     def __eq__(self, o: object) -> bool:
+        if self.operator == PredicateOps.EQ or self.operator == PredicateOps.NEQ and self.operator == PredicateOps.OR and self.operator == PredicateOps.AND:
+            for operand in self.operands:
+                if operand not in o.operands:
+                    return False
+            
+            return True
+            
         return repr(self) == repr(o)
 
     def __hash__(self) -> int:
