@@ -138,7 +138,11 @@ class SQLParser:
     def parsePredicate(self, predicate):
         predicate_key = next(iter(predicate))
 
-        if predicate_key != 'and':
+        if predicate_key == 'or':
+            for orpredicate in predicate['or']:
+                orpredicate_key = next(iter(orpredicate))
+                self.parsePredicateCondition(orpredicate, orpredicate_key)
+        elif predicate_key != 'and':
             self.parsePredicateCondition(predicate, predicate_key)
         else:
             for andpredicate in predicate['and']:

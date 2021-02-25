@@ -3,19 +3,19 @@
 import csv
 from DDBMS.DB import db
 
-@db.execute
+@db.execute_commit
 def deleteTable(table):
     return "DELETE FROM " + table + ";"
 
-@db.execute
+@db.execute_commit
 def insertIntoTable(table, values):
     return "INSERT INTO " + table + " VALUES " + str(values) + ';'
 
-@db.execute
+@db.execute_commit
 def insertIntoAttribute(values):
     return "INSERT INTO Attribute (RelationName, AttributeName, DataType, isKey) VALUES " + str(values) + ';'
 
-@db.execute
+@db.execute_commit
 def insertIntoVerticalFragment(frag, relation, attrs):
     attrs_str = "("
     for attr in attrs:
@@ -26,7 +26,7 @@ def insertIntoVerticalFragment(frag, relation, attrs):
     return "INSERT INTO VerticalFragment SELECT '" + frag + "', AttributeID FROM Attribute WHERE RelationName = '" + relation + "' AND " + attrs_str 
 
 
-@db.execute
+@db.execute_commit
 def insertIntoDerivedHorizontalFragment(l_relation, l_attr, l_frag, r_relation, r_attr, r_frag):
     return "CALL insertDerivedHorizontalFragment('" + l_relation + "', '" + l_attr + "', '" + l_frag + "', '" + r_relation + "', '" + r_attr + "', '" + r_frag + "')"
 
