@@ -13,41 +13,31 @@ def getSelectNodes(node):
 
     return select_nodes
 
-
 def getNewParent(select_cols, node):
     if isinstance(node, RelationNode):
         for select_col in select_cols:
             if select_col.table == node.table:
-                return True       
-        return None
+                return [None, -1, True] # [Deeper parent, index bw parent & child, whether select contains columns from subtree]
+        return [None, -1, False]
     
-    push_select_down = True
-    deeper_new_parent = None
-    insert_child_idx = -1
-
+    valid_subtrees = []
     for idx, child in enumerate(node.children):
-        possible_deeper_new_parent = getNewParent(select_cols, child)
-        if possible_deeper_new_parent is not None:
-            if insert_child_idx != -1:
-                push_select_down = False
-                break
-            deeper_new_parent = possible_deeper_new_parent
-            insert_child_idx = idx
+        subtree_details = getNewParent(select_cols, child)
+        if subtree_details[2] == True:
+            valid_subtrees.append((subtree_details, idx))
     
-    if push_select_down and deeper_new_parent is not None:
-        if deeper_new_parent != True:
-            return deeper_new_parent
-        elif isinstance(node, JoinNode) or isinstance(node, CrossNode):
-            return [node, insert_child_idx]
+    if len(valid_subtrees) == 1:
+        subtree_details, child_idx = valid_subtrees[0]
+        if subtree_details[0] is not None:
+            return subtree_details
         else:
-            return [node, -1]
-
-    if isinstance(node, ProjectNode) or \
-       isinstance(node, GroupbyNode) or \
-       isinstance(node, UnionNode):
-       return [node, -1]
-    
-    return None
+            return [node, child_idx, True]
+    elif len(valid_subtrees) > 1:
+        if isinstance(node, UnionNode):
+            return [node, -1, True]
+        return [None, -1, True]
+    else:
+        return [None, -1, False]
     
 
 def insertSelect(parent, child_idx, select_node):
@@ -64,8 +54,8 @@ def pushSelect(root):
         select_node_cols = select_node.predicate.getAllColumns()
         parent_detail = getNewParent(select_node_cols, select_node.children[0])
 
-        if isinstance(parent_detail, tuple):
-            parent, child_idx = parent_detail
+        if parent_detail[0] is not None:
+            parent, child_idx, _ = parent_detail
             select_node.parent.replaceChild(select_node, select_node.children[0])
             if child_idx != -1:
                 insertSelect(parent, child_idx, select_node)

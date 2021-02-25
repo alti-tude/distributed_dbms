@@ -51,6 +51,9 @@ while True:
         root.to_treelib(tree)
         tree.show()
         root = pushSelect(ra_tree.projected)
+        tree = Tree()
+        root.to_treelib(tree)
+        tree.show()
         root = CombineSelectAndCross(root)
         root = pushProject(root)
 
