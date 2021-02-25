@@ -30,8 +30,6 @@ def __pullUp(union : UnionNode) -> Tuple[bool, Node]:
     elif isinstance(parent, CrossNode):
         for child in union.children:
             union_idx = parent.getChildId(union)
-            #FIXME copy subtree funtion
-            #       should take care of setting parents etc properly
             new_node = parent.copy()
             new_node.replaceChildById(union_idx, child)
             new_nodes.append(new_node)

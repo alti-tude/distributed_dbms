@@ -58,12 +58,12 @@ while True:
         root = pushProject(root)
 
         #? Materialise handles reduce vertical
-        root = materialiseAllTables(root)
 
         tree = Tree()
         root.to_treelib(tree)
         tree.show()
         
+        root = materialiseAllTables(root)
         root = pushSelect(root)
         root = pushProject(root)
         root = moveUnionUp(root)

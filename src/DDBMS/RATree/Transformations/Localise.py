@@ -10,19 +10,6 @@ from DDBMS.DB import db
 
 import moz_sql_parser
 
-'''
-TODO build materialisation for all frags and put in map
-TODO build materialisation for all tables and put in map
-
-TODO recurse through tree and replace leaves with materialisations
-
-TODO call optimisations (put these as seperate files)
-    union up
-    TODO prune horizontal using above selects
-    TODO prune derived horizontal using join criteria
-    TODO prune vertical using projection
-'''
-
 @db.execute
 def __getFragments(relation_name):
     #FragmentID | FragmentationType | RelationName
