@@ -15,4 +15,4 @@ SERVER_DB_CONFIG = {
 
 ConfigToUse = SERVER_DB_CONFIG
 
-DEBUG = True
+DEBUG = False
