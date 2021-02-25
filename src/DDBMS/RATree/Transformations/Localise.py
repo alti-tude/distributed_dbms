@@ -183,6 +183,9 @@ def materialiseTable(node : RelationNode):
             frags.append(materialiseDerivedHorizontalFrag(frag_detail, table))
 
         return UnionNode(children=frags)
+    
+    else:
+        return node
 
 
 def materialiseAllTables(node : Node):
