@@ -4,10 +4,6 @@
 
 **Team Members:** Kartik Gupta (20171018), Sanjana Sunil (20171027)
 
-## Report
-
-The report containing diagrams, fragmentation types, allocation mapping, printout of system catalog etc. can be seen in `Report.pdf`. 
-
 ## System Catalog
 
 The system catalog has been created on all three servers. The SQL script for creation and population can be seen in `src/system_catalog.sql`. 
@@ -40,3 +36,7 @@ python src/DDBMS/QuerySystemCatalog.py --get-sites --server-config <Fragment ID>
 
 Each server is thought as being in Hyderabad, Delhi or Mumbai. To create the tables, use the script `src/<City Name>/movie_db_tables.sql`. To populate with sample data, use `src/<City Name>/small_populate.sql`. This has been created in their respective servers.
 
+## Creation of Optimized Query Tree
+
+Install all requirements in `src/requirements.txt` using `pip install -r requirements.txt`.
+Run `src/main.py` and input queries at the prompt.
