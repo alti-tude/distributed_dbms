@@ -3,6 +3,7 @@ DROP PROCEDURE IF EXISTS getSites;
 DROP PROCEDURE IF EXISTS getHorizontalFragments;
 DROP PROCEDURE IF EXISTS getVerticalFragments;
 DROP PROCEDURE IF EXISTS getDerivedHorizontalFragments;
+DROP PROCEDURE IF EXISTS insertDerivedHorizontalFragment;
 
 
 DELIMITER $$
@@ -59,5 +60,26 @@ BEGIN
     WHERE   Fragment.RelationName = relation_name
             AND LeftAttributeID = LeftAttribute.AttributeID
             AND RightAttributeID = RightAttribute.AttributeID;
+END $$
+DELIMITER ;
+
+
+DELIMITER $$
+CREATE PROCEDURE insertDerivedHorizontalFragment(IN LeftRelation VARCHAR(255), IN LeftAttribute VARCHAR(255), IN LeftFrag VARCHAR(255), IN RightRelation VARCHAR(255), IN RightAttribute VARCHAR(255), IN RightFrag VARCHAR(255))
+BEGIN
+	SET @LeftID  = 0;
+	SET @RightID = 0;
+
+	SELECT  AttributeID INTO @LeftID
+	FROM    Attribute
+	WHERE   RelationName = LeftRelation AND AttributeName = LeftAttribute;
+
+	SELECT  AttributeID INTO @RightID
+	FROM    Attribute
+	WHERE   RelationName = RightRelation AND AttributeName = RightAttribute;
+
+	INSERT INTO DerivedHorizontalFragment
+	SELECT LeftFrag, @LeftID, @RightID, RightFrag;
+
 END $$
 DELIMITER ;

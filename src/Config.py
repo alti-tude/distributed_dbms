@@ -13,6 +13,6 @@ SERVER_DB_CONFIG = {
     "database": "Samosa",
 }
 
-ConfigToUse = LOCAL_DB_CONFIG
+ConfigToUse = SERVER_DB_CONFIG
 
 DEBUG = True

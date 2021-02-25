@@ -17,6 +17,7 @@ class DB:
             result = [item for item in cur]
             column_names = [item for item in cur.column_names]
 
+            conn.commit()
             cur.close()
             conn.close()
 
