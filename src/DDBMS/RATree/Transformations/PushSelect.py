@@ -6,7 +6,14 @@ def getSelectNodes(node):
 
     select_nodes = []
     if isinstance(node, SelectNode):
-        select_nodes.append(node)
+        cols = node.predicate.getAllColumns()
+        valid_where_clause = True
+        for col in cols:
+            if col.aggregation is not None:
+                valid_where_clause = False
+                break
+        if valid_where_clause:
+            select_nodes.append(node)
     
     for child in node.children:
         select_nodes += getSelectNodes(child)
