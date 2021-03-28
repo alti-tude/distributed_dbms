@@ -6,15 +6,38 @@ from DDBMS.RATree.Transformations.MoveUnionUp import moveUnionUp, __moveUnionUpS
 from DDBMS.RATree.Transformations.PushProject import pushProject
 from DDBMS.RATree.Transformations.PushSelect import pushSelect
 from DDBMS.Parser.SQLParser import *
+from DDBMS.RATree.Nodes import *
 from DDBMS.RATree import RATreeBuilder
 from pprint import PrettyPrinter 
 import Config
 from treelib import Tree
 import traceback
+from DDBMS.DB import db
+
+@db.execute
+def queryFragmentSite(fragment_name):
+    return "SELECT SiteID FROM LocalMapping WHERE FragmentID = '" + fragment_name + "';"
+
+def getFragmentSite(fragment_name):
+    result = queryFragmentSite(fragment_name)
+    return result['SiteID'].iloc[0]
 
 def execute(sql_query : str):
     SQLQuery.reset()
     root = getRATree(sql_query)
+    tree = Tree()
+    root.to_treelib(tree)
+    tree.show()
+
+    getExecutionSites(root)
+
+def getExecutionSites(node):
+    if isinstance(node, RelationNode):
+        node.site = getFragmentSite(node.name)
+        return
+
+    for child in node.children:
+        getExecutionSites(child)
 
 def getRATree(query : str):
     parser = SQLParser()

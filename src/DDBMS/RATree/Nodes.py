@@ -14,6 +14,8 @@ class Node(BasePrimitive):
         for child in children:
             self.addChild(child)
 
+        self.site = None
+
         
     def makeRoot(self):
         self.parent = None
@@ -220,6 +222,7 @@ class RelationNode(Node):
     def __init__(self, table : Table, children = []) -> None:
         super().__init__(children=children)
         self.table = table
+        self.name = table.name
 
     def to_dict(self):
         output = {
@@ -281,6 +284,7 @@ class VerticalFragNode(RelationNode):
 class DerivedHorizontalFragNode(RelationNode):
     def __init__(self, table: Table, left_frag_name, right_frag_name, join_predicate, children = []) -> None:
         super().__init__(table, children)
+        self.name = left_frag_name
         self.left_frag_name = left_frag_name
         self.right_frag_name = right_frag_name
         self.join_predicate : Predicate = join_predicate
@@ -296,4 +300,4 @@ class DerivedHorizontalFragNode(RelationNode):
         }
     
     def compact_display(self):
-        return "DERIVED HORIZONTAL FRAGMENT: " + self.left_frag_name
+        return "DERIVED HORIZONTAL FRAGMENT: " + self.name
