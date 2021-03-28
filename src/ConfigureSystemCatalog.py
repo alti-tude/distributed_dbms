@@ -87,5 +87,4 @@ def readSysCatalogCSV(input_file):
 if __name__ == '__main__':
     clearAllTables()
 
-    # TODO change path
     readSysCatalogCSV('../../trial.csv')
