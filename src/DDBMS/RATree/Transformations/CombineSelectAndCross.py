@@ -1,5 +1,4 @@
 from DDBMS.RATree.Nodes import CrossNode, JoinNode, Node, SelectNode
-from DDBMS.RATree.RATreeBuilder import RATreeBuilder
 
 
 def __recursiveCombine(cur_node : Node):
@@ -16,6 +15,6 @@ def __recursiveCombine(cur_node : Node):
             new_node = JoinNode(cur_node.predicate, children=child.children)
             parent.replaceChild(cur_node, new_node)
 
-def CombineSelectAndCross(root):
+def combineSelectAndCross(root):
     __recursiveCombine(root)
     return root

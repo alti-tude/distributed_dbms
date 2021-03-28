@@ -16,9 +16,9 @@
 # print(getPredicateObj(predicate))
 
 
-from DDBMS.RATree.Transformations.CombineSelectAndCross import CombineSelectAndCross
-from DDBMS.RATree.Transformations.reduceHorizontalFrag import reduceHorizontalFrag
-from DDBMS.RATree.Transformations.reduceDerivedHorizontalFrag import reduceDerivedHorizontalFrag
+from DDBMS.RATree.Transformations.CombineSelectAndCross import combineSelectAndCross
+from DDBMS.RATree.Transformations.ReduceHorizontalFrag import reduceHorizontalFrag
+from DDBMS.RATree.Transformations.ReduceDerivedHorizontalFrag import reduceDerivedHorizontalFrag
 from DDBMS.RATree.Transformations.Localise import materialiseAllTables, materialiseTable
 from DDBMS.RATree.Transformations.MoveUnionUp import moveUnionUp, __moveUnionUpStep
 from DDBMS.RATree.Transformations.PushProject import pushProject
@@ -54,7 +54,7 @@ while True:
         tree = Tree()
         root.to_treelib(tree)
         tree.show()
-        root = CombineSelectAndCross(root)
+        root = combineSelectAndCross(root)
         root = pushProject(root)
 
         #? Materialise handles reduce vertical

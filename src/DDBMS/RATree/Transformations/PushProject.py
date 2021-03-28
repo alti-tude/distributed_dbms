@@ -5,6 +5,9 @@ from DDBMS.RATree.Nodes import *
 
 def optimizeProject(node):
     if isinstance(node, RelationNode):
+        if hasattr(node, 'columns'):
+            return node.columns
+            
         return SQLQuery.get().filterCols(table=node.table, aggregation=Aggregation.NONE)
 
     node_children = node.children
