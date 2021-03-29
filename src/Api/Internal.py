@@ -4,9 +4,9 @@ from DDBMS.RATree.Optimise import optimise
 from DDBMS.Parser import SQLParser
 from DDBMS.Parser.SQLQuery import SQLQuery
 
-from . import app
 from Config import DEBUG, SITE_CONFIG
 from DDBMS import execute
+from DDBMS.Execution import DataTransfer
 
 from flask import request, Response, Blueprint
 
@@ -40,4 +40,14 @@ def internalQuery():
         "ip": SITE_CONFIG.IP[0], 
         "port": SITE_CONFIG.IP[1]
     }
+
+@bp.route("/put", methods=["GET", "POST"])
+def put():
+    payload = request.json
     
+    if DEBUG:
+        print(payload)
+    
+    DataTransfer.put(**payload)
+
+    return Response(status=200)

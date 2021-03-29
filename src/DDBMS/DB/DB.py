@@ -1,9 +1,18 @@
 import mysql.connector
 import pandas as pd
+import contextlib
 
 class DB:
     def __init__(self, config):
         self.config = config
+        self._return_strings = False
+
+    @contextlib.contextmanager
+    def returnStrings(self):
+        self._return_strings = True
+        yield
+
+        self._return_strings = False
 
     def execute(self, query_function):
         def wrapper(*args, **kwargs):
@@ -11,6 +20,8 @@ class DB:
             cur = conn.cursor()
             
             query = query_function(*args, **kwargs)
+            if self._return_strings: return query
+
             assert(isinstance(query,str))
             cur.execute(query)
 
@@ -30,6 +41,8 @@ class DB:
             cur = conn.cursor()
             
             query = query_function(*args, **kwargs)
+            if self._return_strings: return query
+            
             assert(isinstance(query,str))
             cur.execute(query)
 

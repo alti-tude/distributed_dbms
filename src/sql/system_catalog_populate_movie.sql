@@ -141,9 +141,9 @@ SELECT 'Show_M', @ShowScreenID, @ScreenScreenID, 'Screen_M';
 /*----------------------------------------------------SITE*/
 
 INSERT INTO Site
-VALUES  ('Hyderabad', '10.3.5.215', 'user', 'iiit123'),
-        ('Mumbai', '10.3.5.214', 'user', 'iiit123'),
-        ('Delhi', '10.3.5.213', 'user', 'iiit123');
+VALUES  ('Hyderabad', '10.3.5.215', 12345, 'user', 'iiit123'),
+        ('Mumbai', '10.3.5.214', 12346, 'user', 'iiit123'),
+        ('Delhi', '10.3.5.213', 12347, 'user', 'iiit123');
 
 /*-----------------------------------------------------LOCAL MAPPING*/
 

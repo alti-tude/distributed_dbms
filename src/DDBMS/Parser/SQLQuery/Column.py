@@ -1,6 +1,7 @@
 from DDBMS.BasePrimitive import BasePrimitive
 from .Table import Table
 from .Symbols import Aggregation
+from DDBMS.DB.DBUtils import getDataType
 
 class Column(BasePrimitive):
     def __init__(self, name : str, table : Table, alias = None, aggregation = Aggregation.NONE) -> None:
@@ -8,6 +9,8 @@ class Column(BasePrimitive):
         self.table = table
         self.alias = alias
         self.aggregation = aggregation
+        self.data_type = str(getDataType(self.name, self.table.name).iloc[0]["DataType"])
+        
 
         if alias is None:
             self.alias = self.name
@@ -18,7 +21,8 @@ class Column(BasePrimitive):
                 'name': self.name, 
                 'table': self.table.to_dict() if self.table is not None else None, 
                 'alias': self.alias, 
-                'agg': self.aggregation
+                'agg': self.aggregation,
+                'data_type': self.data_type
             }
         }
             

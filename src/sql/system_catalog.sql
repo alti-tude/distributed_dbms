@@ -51,6 +51,7 @@ CREATE TABLE DerivedHorizontalFragment (
 CREATE TABLE Site (
     SiteID VARCHAR(255) NOT NULL,
     IP VARCHAR(255) NOT NULL,
+    Port INT NOT NULL,
     UserName VARCHAR(255),
     Password VARCHAR(255),
     PRIMARY KEY (SiteID)

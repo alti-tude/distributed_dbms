@@ -14,6 +14,7 @@ SERVER_DB_CONFIG = {
 }
 
 ConfigToUse = LOCAL_DB_CONFIG
+GET_RETRY_DELAY = 0.1 #in seconds
 DEBUG = True
 
 class HYDERABAD_CONFIG:

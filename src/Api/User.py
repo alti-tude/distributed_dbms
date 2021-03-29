@@ -19,6 +19,7 @@ def query():
     
     query = request.args["query"]
     
+    #TODO replace with new site object instead of config hardcode
     for ip, port in SITE_CONFIG.OTHER_SITES:
         forward_url = f"http://{ip}:{port}/internal/query"
         response = requests.get(forward_url, params={"query": query, "id": id})
