@@ -20,9 +20,21 @@ from DDBMS.DB import db
 def queryFragmentSite(fragment_name):
     return "SELECT SiteID FROM LocalMapping WHERE FragmentID = '" + fragment_name + "';"
 
+@db.execute
+def getApplicationSchema(relation_name):
+    return "SELECT DataType FROM Attribute WHERE RelationName = '"+ relation_name +"';"
+
 def getFragmentSite(fragment_name):
     result = queryFragmentSite(fragment_name)
     return result['SiteID'].iloc[0]
+
+def getDataTypeSize(datatype):
+    datatype_size = {'INT':4, 'DATETIME':8, 'DATE':3, 'TINYTEXT':256, 'TEXT':65535, 'MEDIUMTEXT':16777215, 'LONGTEXT': 4294967295}
+    if datatype in datatype_size:
+        return datatype_size[datatype]
+    elif datatype[0:7] == 'VARCHAR':
+        return int(datatype[8:-1]) + 2
+    return 4
 
 def execute(sql_query : str):
     try:
@@ -31,7 +43,6 @@ def execute(sql_query : str):
         tree = Tree()
         root.to_treelib(tree)
         tree.show()
-
         getRowsAndExecutionSites(root) 
     except Exception as e:
         if Config.DEBUG:
@@ -85,6 +96,9 @@ def getRowsAndExecutionSites(node):
     
     if isinstance(node, CrossNode):
         return prod_child_rows
+    
+    if isinstance(node, JoinNode):
+        return prod_child_rows * Config.SELECTIVITY_FACTOR
 
     return max_child_rows
 
@@ -95,6 +109,10 @@ def getRATree(query : str):
     ra_tree = RATreeBuilder()
     root = ra_tree.projected
     root = pushSelect(ra_tree.projected)
+
+    tree = Tree()
+    root.to_treelib(tree)
+    tree.show()
     root = CombineSelectAndCross(root)
     root = pushProject(root)
 
