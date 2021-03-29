@@ -6,6 +6,11 @@ from DDBMS.Parser.SQLQuery.Table import Table
 from DDBMS.DB import db
 from DDBMS.DB.DBUtils import *
 
+@db.execute
+def test():
+    return "select * from LocalMapping;"
+
+print(test())
 columns = [
     Column("MovieId", alias="id", table=Table("Movie")),
     Column("Location", alias="loc", table=Table("Theater")),
@@ -23,4 +28,4 @@ data = {
 data = pd.DataFrame(data)
 
 send(Site("hyderabad", "localhost", 12345),"quid", "oid", data, columns)
-print(get("quid", "oid"))
+# print(get("quid", "oid"))
