@@ -1,4 +1,5 @@
 from DDBMS.RATree.Nodes import *
+from DDBMS.Parser.SQLQuery.Symbols import Aggregation
 
 def getSelectNodes(node):
     if isinstance(node, RelationNode):
@@ -9,7 +10,7 @@ def getSelectNodes(node):
         cols = node.predicate.getAllColumns()
         valid_where_clause = True
         for col in cols:
-            if col.aggregation is not None:
+            if col.aggregation != Aggregation.NONE:
                 valid_where_clause = False
                 break
         if valid_where_clause:
