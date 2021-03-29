@@ -47,6 +47,9 @@ def execute(sql_query : str):
         root.to_treelib(tree)
         tree.show()
         getRowsAndExecutionSites(root) 
+        tree = Tree()
+        root.to_treelib(tree)
+        tree.show()
     except Exception as e:
         if Config.DEBUG:
             traceback.print_exc()

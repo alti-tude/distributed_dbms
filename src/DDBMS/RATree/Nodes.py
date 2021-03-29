@@ -94,6 +94,8 @@ class SelectNode(Node):
         return output
     
     def compact_display(self):
+        if self.site is not None:
+            return "SELECT: " + self.predicate.compact_display() + " (site: " + self.site + ")" 
         return "SELECT: " + self.predicate.compact_display()
 
 class ProjectNode(Node):
@@ -117,6 +119,8 @@ class ProjectNode(Node):
                 columns_str += ", "
             columns_str += column.compact_display()
 
+        if self.site is not None:
+            return "PROJECT: " + columns_str + " (site: " + self.site + ")" 
         return "PROJECT: " + columns_str
 
 
@@ -141,6 +145,8 @@ class FinalProjectNode(Node):
                 columns_str += ", "
             columns_str += column.compact_display()
 
+        if self.site is not None:
+            return "FINAL PROJECT: " + columns_str + " (site: " + self.site + ")" 
         return "FINAL PROJECT: " + columns_str
 
 class GroupbyNode(Node):
@@ -165,6 +171,8 @@ class GroupbyNode(Node):
                 columns_str += ", "
             columns_str += column.compact_display()
 
+        if self.site is not None:
+            return "GROUP BY: " + columns_str + " (site: " + self.site + ")" 
         return "GROUP BY: " + columns_str
 
 
@@ -181,6 +189,8 @@ class UnionNode(Node):
         return output
     
     def compact_display(self):
+        if self.site is not None:
+            return "UNION" + " (site: " + self.site + ")" 
         return "UNION"
 
 class JoinNode(Node):
@@ -201,6 +211,8 @@ class JoinNode(Node):
         return output
     
     def compact_display(self):
+        if self.site is not None:
+            return "JOIN: " + self.join_predicate.compact_display() + " (site: " + self.site + ")" 
         return "JOIN: " + self.join_predicate.compact_display()
 
 
@@ -218,6 +230,8 @@ class CrossNode(Node):
         return output
     
     def compact_display(self):
+        if self.site is not None:
+            return "CROSS" + " (site: " + self.site + ")" 
         return "CROSS"
 
 class RelationNode(Node):
@@ -243,6 +257,8 @@ class RelationNode(Node):
         return super().__eq__(o)
     
     def compact_display(self):
+        if self.site is not None:
+            return "RELATION: " + self.table.compact_display() + " (site: " + self.site + ")" 
         return "RELATION: " + self.table.compact_display()
 
 class HorizontalFragNode(RelationNode):
@@ -262,6 +278,8 @@ class HorizontalFragNode(RelationNode):
         }
     
     def compact_display(self):
+        if self.site is not None:
+            return "HORIZONTAL FRAGMENT: " + self.name + " (site: " + self.site + ")" 
         return "HORIZONTAL FRAGMENT: " + self.name
 
 class VerticalFragNode(RelationNode):
@@ -281,6 +299,8 @@ class VerticalFragNode(RelationNode):
         }
 
     def compact_display(self):
+        if self.site is not None:
+            return "VERTICAL FRAGMENT: " + self.name + " (site: " + self.site + ")" 
         return "VERTICAL FRAGMENT: " + self.name
 
 class DerivedHorizontalFragNode(RelationNode):
@@ -302,4 +322,6 @@ class DerivedHorizontalFragNode(RelationNode):
         }
     
     def compact_display(self):
+        if self.site is not None:
+            return "DERIVED HORIZONTAL FRAGMENT: " + self.name + " (site: " + self.site + ")" 
         return "DERIVED HORIZONTAL FRAGMENT: " + self.name
