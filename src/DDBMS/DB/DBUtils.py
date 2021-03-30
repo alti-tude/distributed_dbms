@@ -64,3 +64,11 @@ def createSQLQuery(project_cols, from_table, where_predicate=None):
     where_predicate_str = where_predicate.compact_display()
 
     return "SELECT " + project_cols_str + " FROM " + from_table_str + " WHERE " + where_predicate_str + ";"
+
+@db.execute_commit
+def executeUnion(table1, table2):
+    return "SELECT * FROM " + table1.name + " UNION ALL SELECT * FROM " + table2.name + ";"
+
+@db.execute_commit
+def executeCross(table1, table2):
+    return "SELECT * FROM " + table1.name + ", " + table2.name + ";"
