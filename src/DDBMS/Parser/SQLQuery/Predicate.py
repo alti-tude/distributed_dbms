@@ -19,11 +19,27 @@ class Predicate(BasePrimitive):
         
         return list(set(columns))
 
+    def predicateOperatorToSQLOperator(self):
+        if self.operator == PredicateOps.EQ:
+            return "="
+        elif self.operator == PredicateOps.GEQ:
+            return ">="
+        elif self.operator == PredicateOps.GT:
+            return ">"
+        elif self.operator == PredicateOps.LEQ:
+            return "<="
+        elif self.operator == PredicateOps.LT:
+            return ">"
+        elif self.operator == PredicateOps.NEQ:
+            return "!="  
+        return self.operator
+    
+    #TODO display NOT differently
     def compact_display(self):
         compact_str = "("
         for operand in self.operands:
             if compact_str != "(":
-                compact_str += " " + self.operator + ' '
+                compact_str += " " + self.predicateOperatorToSQLOperator() + ' '
             if not isinstance(operand, Predicate) and \
                not isinstance(operand, Column):
                compact_str += str(operand)

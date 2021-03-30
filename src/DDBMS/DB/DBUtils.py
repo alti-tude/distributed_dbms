@@ -52,3 +52,15 @@ def insertIntoTable(table_name, data, columns = None):
         query = f"insert into `{table_name}`({cols}) values {values};"
     
     return query
+
+def createSQLQuery(project_cols, from_table, where_predicate=None):
+    project_cols_str = ""
+    for col in project_cols:
+        if project_cols_str != "":
+            project_cols_str += ", "
+        project_cols_str += col.compact_display()
+    
+    from_table_str = from_table.name
+    where_predicate_str = where_predicate.compact_display()
+
+    return "SELECT " + project_cols_str + " FROM " + from_table_str + " WHERE " + where_predicate_str + ";"

@@ -1,4 +1,4 @@
-from DDBMS.Execution.Execute import buildTree
+from DDBMS.Execution import buildTree
 import os
 from DDBMS.RATree.RATreeBuilder import RATreeBuilder
 from DDBMS.Parser import SQLParser
