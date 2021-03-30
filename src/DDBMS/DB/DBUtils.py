@@ -1,3 +1,7 @@
+import datetime
+
+from pandas._config import config
+from Config import DEBUG
 import pandas as pd
 from typing import List
 from DDBMS.DB import db
@@ -24,20 +28,29 @@ def dropTable(table_name):
 
 @db.execute_commit
 def createTable(table_name, columns, col_names : List[str]):
+    if DEBUG: print("="*20, table_name, col_names)
     cols = ','.join([f"{col_name} {col.data_type} " for col_name, col in zip(col_names, columns)])
     return f"create table `{table_name}` ({cols});"
+
+@db.execute_commit
+def renameTable(oname, nname):
+    return f"rename table `{oname}` to `{nname}`;"
 
 @db.execute_commit
 def insertIntoTable(table_name, data, columns = None):
     if isinstance(data, pd.DataFrame):
         data = data.values.tolist()
-    
-    
+
+    if len(data) == 0:
+        return f"select * from `{table_name}`;"
+
     def formatRow(row):
         template = []
         for i, elem in enumerate(row):
             if isinstance(elem, str):
                 template.append(f"'{elem}'")
+            elif isinstance(elem, datetime.date):
+                template.append(f"'{elem.isoformat()}'")
             else:
                 template.append(f"{elem}")
         
@@ -53,27 +66,31 @@ def insertIntoTable(table_name, data, columns = None):
     
     return query
 
-def createSQLQuery(project_cols, from_table, where_predicate=None):
+@db.execute
+def selectQuery(project_cols, from_table, where_predicate=None):
     project_cols_str = ""
     for col in project_cols:
         if project_cols_str != "":
             project_cols_str += ", "
-        project_cols_str += col.compact_display()
+        print(col)
+        project_cols_str += col.compact_display(from_table)
     
     from_table_str = from_table.name
-    where_predicate_str = where_predicate.compact_display()
+    if where_predicate is not None and len(where_predicate.operands)!=0:
+        where_predicate_str = where_predicate.compact_display()
+        return "SELECT " + project_cols_str + " FROM `" + from_table_str + "` WHERE " + where_predicate_str + ";"
+    else:
+        return "SELECT " + project_cols_str + " FROM `" + from_table_str + "`;"
 
-    return "SELECT " + project_cols_str + " FROM " + from_table_str + " WHERE " + where_predicate_str + ";"
-
-@db.execute_commit
-def executeUnion(tables):
+@db.execute
+def unionQuery(tables):
     sql_query = ""
     for table in tables:
         if sql_query != "":
             sql_query += " UNION ALL "
-        sql_query += "SELECT * FROM " + table.name
+        sql_query += "SELECT * FROM `" + table.name + "`"
     return sql_query + ";"
 
-@db.execute_commit
-def executeCross(table1, table2):
-    return "SELECT * FROM " + table1.name + ", " + table2.name + ";"
+@db.execute
+def crossQuery(table1, table2):
+    return "SELECT * FROM `" + table1.name + "`, `" + table2.name + "`;"

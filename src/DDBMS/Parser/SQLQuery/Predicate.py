@@ -42,7 +42,10 @@ class Predicate(BasePrimitive):
                 compact_str += " " + self.predicateOperatorToSQLOperator() + ' '
             if not isinstance(operand, Predicate) and \
                not isinstance(operand, Column):
-               compact_str += str(operand)
+                if isinstance(operand, str):
+                    compact_str += f"'{operand}'"
+                else:
+                    compact_str += f"{operand}"
             else:
                 compact_str += operand.compact_display()
 

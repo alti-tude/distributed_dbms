@@ -1,4 +1,4 @@
-from DDBMS.Execution import Site
+from .Site import Site
 from DDBMS.Parser.SQLParser import *
 from DDBMS.RATree.Nodes import *
 from DDBMS import RATree
@@ -78,46 +78,57 @@ def setBestJoinSite(node, children_cols, children_rows):
         node.semijoin_transfer_col = right_col
         node.semijoin_transfer_child = 1
 
+operation_id = 0
 def getRowsAndExecutionSites(node):
+    global operation_id
+    node.operation_id = str(operation_id)
+    
     if isinstance(node, RelationNode):
         node.site = getFragmentSite(node.name)
         cols = SQLQuery.get().filterCols(table=node.table)
-        return [1000000000, cols]
+        node.cols = sorted(cols, key = lambda elem : elem.name)
+        return [1000000000, node.cols]
 
     children_cols = []
     children_rows = []
+    print("="*40, operation_id)
     for child in node.children:
+        operation_id += 1
         [child_rows, child_cols] = getRowsAndExecutionSites(child)
         children_rows.append(child_rows)
-        children_cols.append(child_cols)
-
-    children_cols_set = list(set([j for i in children_cols for j in i]))
+        for col in child_cols:
+            if col not in children_cols:
+                children_cols.append(col)
     
     max_child_rows = max(children_rows)
     best_execution_site_idx = children_rows.index(max_child_rows)
     node.site = node.children[best_execution_site_idx].site
+    node.cols = children_cols
 
     if isinstance(node, SelectNode):
         predicate_selectivity = getPredicateSelectivity(node.predicate)
-        return [max_child_rows * predicate_selectivity, children_cols_set]
+        return [max_child_rows * predicate_selectivity, node.cols]
     
     if isinstance(node, GroupbyNode):
-        return [max_child_rows / 2, children_cols_set]
+        return [max_child_rows / 2, node.cols]
 
     if isinstance(node, UnionNode):
-        return [sum(children_rows), children_cols_set]
+        return [sum(children_rows), node.cols]
     
     if isinstance(node, CrossNode):
-        return [math.prod(children_rows), children_cols_set]
+        node.cols = children_cols
+        return [math.prod(children_rows), node.cols]
 
     if isinstance(node, ProjectNode) or isinstance(node, FinalProjectNode):
-        return [max_child_rows, list(set(node.columns))]
+        node.cols = sorted(list(set(node.columns)), key = lambda elem : elem.name)
+        return [max_child_rows, node.cols]
     
     if isinstance(node, JoinNode):
+        node.cols = children_cols
         setBestJoinSite(node, children_cols, children_rows)
-        return [math.prod(children_rows) * Config.SELECTIVITY_FACTOR, children_cols_set]
+        return [math.prod(children_rows) * Config.SELECTIVITY_FACTOR, node.cols]
 
-    return [max_child_rows, children_cols_set]
+    return [max_child_rows, node.cols]
 
 def buildTree(sql_query : str):
     SQLQuery.reset()
@@ -130,6 +141,7 @@ def buildTree(sql_query : str):
         root.to_treelib(tree)
         tree.show()
 
+    operation_id = 0
     getRowsAndExecutionSites(root)         
     
     if Config.DEBUG:

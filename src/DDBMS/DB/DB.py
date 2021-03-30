@@ -1,3 +1,4 @@
+from Config import DEBUG
 import mysql.connector
 import pandas as pd
 import contextlib
@@ -6,6 +7,7 @@ class DB:
     def __init__(self, config):
         self.config = config
         self._return_strings = False
+        self._return_lists = False
 
     @contextlib.contextmanager
     def returnStrings(self):
@@ -14,12 +16,20 @@ class DB:
 
         self._return_strings = False
 
+    @contextlib.contextmanager
+    def returnLists(self):
+        self._return_lists = True
+        yield
+
+        self._return_lists = False
+
     def execute(self, query_function):
         def wrapper(*args, **kwargs):
             conn = mysql.connector.connect(**self.config)
             cur = conn.cursor()
             
             query = query_function(*args, **kwargs)
+
             if self._return_strings: return query
 
             assert(isinstance(query,str))
@@ -30,6 +40,9 @@ class DB:
 
             cur.close()
             conn.close()
+
+            if self._return_lists:
+                return result
 
             return pd.DataFrame(result, columns=column_names)
         

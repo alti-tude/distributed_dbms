@@ -1,13 +1,12 @@
+from DDBMS.Execution import Site
+from DDBMS.Execution.DataTransfer import getTempTableName
 from flask import request, Response, Blueprint
 import requests
 
 import uuid
 import random
 
-from requests import status_codes
-
-from . import app
-from Config import SITE_CONFIG, DEBUG
+from Config import DEBUG
 
 bp = Blueprint(name="user", import_name = __name__, url_prefix="/user")
 
@@ -20,17 +19,17 @@ def query():
     query = request.args["query"]
     
     #TODO replace with new site object instead of config hardcode
-    for ip, port in SITE_CONFIG.OTHER_SITES:
-        forward_url = f"http://{ip}:{port}/internal/query"
+    for site in Site.ALL_SITES:
+        forward_url = f"{site.getUrl()}/internal/query"
         response = requests.get(forward_url, params={"query": query, "id": id})
         if response.status_code != 200:
             return Response(response.text, response.status_code, response.headers.items())
 
     response = response.json()
-
+    output_table_name = getTempTableName(id, response["operation_id"])
     return {
         "id": id, 
-        "result_url": f"http://{response['ip']}:{response['port']}/user/result?id={id}"
+        "result_url": f"http://{response['ip']}:{response['port']}/user/result?id={output_table_name}"
     }
 
 @bp.route("/result", methods=["GET", "POST"])

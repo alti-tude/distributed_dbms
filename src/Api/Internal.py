@@ -1,17 +1,17 @@
 from DDBMS.Execution import buildTree
-import os
 from DDBMS.RATree.RATreeBuilder import RATreeBuilder
 from DDBMS.Parser import SQLParser
 from DDBMS.Parser.SQLQuery import SQLQuery
-
-from Config import DEBUG, SITE_CONFIG
-from DDBMS import RATree, execute
+from DDBMS import execute
 from DDBMS.Execution import DataTransfer
+
+from Config import DEBUG
 
 from flask import request, Response, Blueprint
 
 import daemon
 import traceback
+import os, signal
 
 bp = Blueprint(name="internal", import_name = __name__, url_prefix="/internal")
 
@@ -28,8 +28,9 @@ def internalQuery():
 
         pid = os.fork()
         if pid == 0:
-            with daemon.DaemonContext():
-                execute()
+            execute(root, id)
+            os.kill(os.getpid(), signal.SIGKILL)
+            # exit(0)
 
     except Exception as e:
         if DEBUG:
@@ -38,15 +39,13 @@ def internalQuery():
 
     return {
         "ip": root.site.ip, 
-        "port": root.site.port
+        "port": root.site.port,
+        "operation_id": root.operation_id
     }
 
 @bp.route("/put", methods=["GET", "POST"])
 def put():
     payload = request.json
-    
-    if DEBUG:
-        print(payload)
     
     DataTransfer.put(**payload)
 

@@ -1,5 +1,8 @@
+import traceback
+from pandas.core.frame import DataFrame
 from DDBMS.Parser.SQLQuery.Table import Table
-from DDBMS.DB.DBUtils import createTable, dropTable, insertIntoTable, tableExists
+from DDBMS.DB.DBUtils import createTable, dropTable, insertIntoTable, renameTable, selectQuery, tableExists
+from DDBMS.DB import db
 from DDBMS.Parser.SQLQuery.Column import Column
 from DDBMS.Execution.Site import Site
 import Config
@@ -13,22 +16,26 @@ import requests
 import time
 
 def getTempTableName(query_id, operation_id):
-    return f"{query_id}_{operation_id}"
+    return f"{query_id}_{operation_id}_{Site.CUR_SITE.name}"
 
-def encode(data):
+def encodeFn(data):
     binary = pickle.dumps(data, fix_imports=True)
     return base64.b64encode(binary).decode('ascii')
 
-def decode(data : str):
+def decodeFn(data : str):
     binary = base64.b64decode(data.encode('ascii'))
     return pickle.loads(binary, fix_imports=True)
 
-def send(site : Site, query_id, operation_id, data : pd.DataFrame, columns = List[Column]):
+def send(site : Site, query_id, operation_id, columns : List[Column], data = None):
+    if data is None:
+        with db.returnLists():
+            data = selectQuery(columns, Table(getTempTableName(query_id, operation_id)))
+
     payload = {
         "query_id": query_id,
         "operation_id": operation_id,
-        "data": encode(data),
-        "columns": encode(columns)
+        "data": encodeFn(data),
+        "columns": encodeFn(columns)
     }
 
     url = f"{site.getUrl()}{Routes.INTERNAL.PUT}"
@@ -37,20 +44,29 @@ def send(site : Site, query_id, operation_id, data : pd.DataFrame, columns = Lis
     if response.status_code != 200:
         raise Exception(response.text)
 
-def put(query_id, operation_id, data, columns):
+def put(query_id, operation_id, data, columns, decode = True):
     table_name = getTempTableName(query_id, operation_id)
-    data = decode(data)
-    columns = decode(columns)
+    if decode:
+        data = decodeFn(data)
+        columns = decodeFn(columns)
+
+    if isinstance(data, pd.DataFrame):
+        raise Exception()
 
     if Config.DEBUG:
-        print(data)
-        print(columns)
+        print("[put]", query_id, operation_id)
+        print("[put]", data)
+        print("[put]", columns)
 
-    dropTable(table_name)
-    createTable(table_name, columns, [f"{col.name}_{col.alias}" for col in columns])
-    insertIntoTable(table_name, data)
+    dropTable(table_name + "_tmp")
+    createTable(table_name + "_tmp", columns, [f"{col.alias}" for col in columns])
+    insertIntoTable(table_name + "_tmp", data)
+    renameTable(table_name + "_tmp", table_name)
+
+    return Table(table_name)
     
 def get(query_id, operation_id):
+    if Config.DEBUG: print(f"[GET]: {operation_id}")
     table_name = getTempTableName(query_id, operation_id)
 
     while not tableExists(table_name):
