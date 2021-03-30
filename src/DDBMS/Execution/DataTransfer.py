@@ -37,7 +37,6 @@ def send(site : Site, query_id, operation_id, data : pd.DataFrame, columns = Lis
     if response.status_code != 200:
         raise Exception(response.text)
 
-
 def put(query_id, operation_id, data, columns):
     table_name = getTempTableName(query_id, operation_id)
     data = decode(data)

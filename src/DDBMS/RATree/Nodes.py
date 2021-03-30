@@ -2,7 +2,6 @@ from copy import copy, deepcopy
 from DDBMS.BasePrimitive import BasePrimitive
 from typing import List
 from DDBMS.Parser.SQLQuery import Column, Table, Predicate
-from abc import ABC, abstractmethod
 from treelib import Tree
 
 class Node(BasePrimitive):
@@ -80,7 +79,7 @@ class Node(BasePrimitive):
 class SelectNode(Node):
     def __init__(self, *, predicate, children = []) -> None:
         super().__init__(children=children)
-        self.predicate = predicate
+        self.predicate : Predicate = predicate
 
     def to_dict(self):
         output = {
