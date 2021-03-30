@@ -66,8 +66,13 @@ def createSQLQuery(project_cols, from_table, where_predicate=None):
     return "SELECT " + project_cols_str + " FROM " + from_table_str + " WHERE " + where_predicate_str + ";"
 
 @db.execute_commit
-def executeUnion(table1, table2):
-    return "SELECT * FROM " + table1.name + " UNION ALL SELECT * FROM " + table2.name + ";"
+def executeUnion(tables):
+    sql_query = ""
+    for table in tables:
+        if sql_query != "":
+            sql_query += " UNION ALL "
+        sql_query += "SELECT * FROM " + table.name
+    return sql_query + ";"
 
 @db.execute_commit
 def executeCross(table1, table2):
