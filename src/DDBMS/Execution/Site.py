@@ -1,3 +1,4 @@
+from Config import DEBUG
 from DDBMS import BasePrimitive
 from DDBMS.DB import db
 
@@ -11,6 +12,9 @@ class Site(BasePrimitive):
 
         if ip == None or port == None:
             site_data = getSiteData(self.name)
+            if DEBUG:
+                print(site_data)
+                
             self.ip = ip if ip is not None else str(site_data.iloc[0]["IP"])
             self.port = port if port is not None else str(site_data.iloc[0]["Port"])
         else:

@@ -8,6 +8,9 @@ class BasePrimitive(abc.ABC):
     
     def compact_display(self):
         return ""
+    
+    def __str__(self) -> str:
+        return repr(self)
         
     def __repr__(self) -> str:
         return str(self.to_dict())

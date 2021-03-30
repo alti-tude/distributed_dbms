@@ -144,3 +144,4 @@ cython_debug/
 #tmp testing files
 *src/TestParser.py
 
+.fuse*

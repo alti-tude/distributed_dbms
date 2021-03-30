@@ -3,6 +3,10 @@ from typing import List
 from DDBMS.DB import db
 
 @db.execute
+def queryFragmentSite(fragment_name):
+    return "SELECT SiteID FROM LocalMapping WHERE FragmentID = '" + fragment_name + "';"
+
+@db.execute
 def getDataType(attribute_name, table_name):
     query = f"select DataType from Attribute where AttributeName = '{attribute_name}' and RelationName = '{table_name}'"
     return query

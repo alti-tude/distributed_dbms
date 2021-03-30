@@ -48,7 +48,6 @@ CREATE TABLE DerivedHorizontalFragment (
     FOREIGN KEY (RightFragmentID) REFERENCES Fragment(FragmentID)
 );
 
--- #TODO store port
 CREATE TABLE Site (
     SiteID VARCHAR(255) NOT NULL,
     IP VARCHAR(255) NOT NULL,

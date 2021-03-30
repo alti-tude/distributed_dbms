@@ -1,3 +1,4 @@
+from DDBMS.Execution.Site import Site
 from copy import copy, deepcopy
 from DDBMS.BasePrimitive import BasePrimitive
 from typing import List
@@ -12,6 +13,8 @@ class Node(BasePrimitive):
         self.children = []
         for child in children:
             self.addChild(child)
+
+        self.site : Site = None
 
         
     def makeRoot(self):
@@ -52,7 +55,8 @@ class Node(BasePrimitive):
     def to_dict(self):
         output = {
             'Node': {
-                'children': str(self.children)
+                'children': str(self.children),
+                'site': str(self.site)
             }
         }
 
@@ -91,6 +95,8 @@ class SelectNode(Node):
         return output
     
     def compact_display(self):
+        if self.site is not None:
+            return "SELECT: " + self.predicate.compact_display() + " (site: " + str(self.site) + ")" 
         return "SELECT: " + self.predicate.compact_display()
 
 class ProjectNode(Node):
@@ -114,6 +120,8 @@ class ProjectNode(Node):
                 columns_str += ", "
             columns_str += column.compact_display()
 
+        if self.site is not None:
+            return "PROJECT: " + columns_str + " (site: " + str(self.site) + ")" 
         return "PROJECT: " + columns_str
 
 
@@ -138,6 +146,8 @@ class FinalProjectNode(Node):
                 columns_str += ", "
             columns_str += column.compact_display()
 
+        if self.site is not None:
+            return "FINAL PROJECT: " + columns_str + " (site: " + str(self.site) + ")" 
         return "FINAL PROJECT: " + columns_str
 
 class GroupbyNode(Node):
@@ -162,6 +172,8 @@ class GroupbyNode(Node):
                 columns_str += ", "
             columns_str += column.compact_display()
 
+        if self.site is not None:
+            return "GROUP BY: " + columns_str + " (site: " + str(self.site) + ")" 
         return "GROUP BY: " + columns_str
 
 
@@ -178,12 +190,16 @@ class UnionNode(Node):
         return output
     
     def compact_display(self):
+        if self.site is not None:
+            return "UNION" + " (site: " +str(self.site) + ")" 
         return "UNION"
 
 class JoinNode(Node):
     def __init__(self, join_predicate, children = []) -> None:
         super().__init__(children=children)
         self.join_predicate : Predicate= join_predicate
+        self.semijoin_transfer_col = None
+        self.semijoin_transfer_child = None
 
     def to_dict(self):
         output = {
@@ -196,6 +212,8 @@ class JoinNode(Node):
         return output
     
     def compact_display(self):
+        if self.site is not None:
+            return "JOIN: " + self.join_predicate.compact_display() + " (site: " + str(self.site) + ")" 
         return "JOIN: " + self.join_predicate.compact_display()
 
 
@@ -213,12 +231,15 @@ class CrossNode(Node):
         return output
     
     def compact_display(self):
+        if self.site is not None:
+            return "CROSS" + " (site: " + str(self.site) + ")" 
         return "CROSS"
 
 class RelationNode(Node):
     def __init__(self, table : Table, children = []) -> None:
         super().__init__(children=children)
         self.table = table
+        self.name = table.name
 
     def to_dict(self):
         output = {
@@ -237,6 +258,8 @@ class RelationNode(Node):
         return super().__eq__(o)
     
     def compact_display(self):
+        if self.site is not None:
+            return "RELATION: " + self.table.compact_display() + " (site: " + str(self.site) + ")" 
         return "RELATION: " + self.table.compact_display()
 
 class HorizontalFragNode(RelationNode):
@@ -256,6 +279,8 @@ class HorizontalFragNode(RelationNode):
         }
     
     def compact_display(self):
+        if self.site is not None:
+            return "HORIZONTAL FRAGMENT: " + self.name + " (site: " + str(self.site) + ")" 
         return "HORIZONTAL FRAGMENT: " + self.name
 
 class VerticalFragNode(RelationNode):
@@ -275,11 +300,14 @@ class VerticalFragNode(RelationNode):
         }
 
     def compact_display(self):
+        if self.site is not None:
+            return "VERTICAL FRAGMENT: " + self.name + " (site: " + str(self.site) + ")" 
         return "VERTICAL FRAGMENT: " + self.name
 
 class DerivedHorizontalFragNode(RelationNode):
     def __init__(self, table: Table, left_frag_name, right_frag_name, join_predicate, children = []) -> None:
         super().__init__(table, children)
+        self.name = left_frag_name
         self.left_frag_name = left_frag_name
         self.right_frag_name = right_frag_name
         self.join_predicate : Predicate = join_predicate
@@ -295,4 +323,6 @@ class DerivedHorizontalFragNode(RelationNode):
         }
     
     def compact_display(self):
-        return "DERIVED HORIZONTAL FRAGMENT: " + self.left_frag_name
+        if self.site is not None:
+            return "DERIVED HORIZONTAL FRAGMENT: " + self.name + " (site: " + str(self.site) + ")" 
+        return "DERIVED HORIZONTAL FRAGMENT: " + self.name
