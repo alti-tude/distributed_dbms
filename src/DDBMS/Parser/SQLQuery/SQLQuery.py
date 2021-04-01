@@ -1,3 +1,4 @@
+from copy import deepcopy
 from .Predicate import Predicate
 from .Column import Column
 from .Table import Table
@@ -78,6 +79,11 @@ class SQLQuery:
             if repr(new_col) == repr(old_col):
                 return old_col
         
+        self.columns.append(new_col)
+        return new_col
+
+    def copyCol(self, col : Column):
+        new_col = Column(col.name, col.table, col.alias, col.aggregation, col.data_type, col.temp_name)
         self.columns.append(new_col)
         return new_col
 

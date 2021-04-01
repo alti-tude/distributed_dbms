@@ -4,12 +4,14 @@ from .Symbols import Aggregation
 from DDBMS.DB.DBUtils import getDataType
 
 class Column(BasePrimitive):
-    def __init__(self, name : str, table : Table, alias = None, aggregation = Aggregation.NONE) -> None:
+    def __init__(self, name : str, table : Table, alias = None, aggregation = Aggregation.NONE, data_type=None, temp_name=None) -> None:
         self.name = name
         self.table = table
         self.alias = alias
+        self.temp_name = temp_name
         self.aggregation = aggregation
-        self.data_type = str(getDataType(self.name, self.table.name).iloc[0]["DataType"])
+        self.data_type = str(getDataType(self.name, self.table.name).iloc[0]["DataType"]) if data_type is None else data_type
+        
         
 
         if alias is None:
@@ -28,18 +30,19 @@ class Column(BasePrimitive):
             
         return output
     
-    def compact_display(self, table=None):
+    def compact_display(self, temp_name = False):
+        if temp_name:
+            return self.temp_name
+
         compact_str = ""
         
         if self.aggregation != Aggregation.NONE:
             compact_str += self.aggregation + '('
         
-        if table is None:
-            compact_str += f"`{self.table.alias}`."
-        else:
-            compact_str += f"`{table.alias}`."
+        compact_str += f"`{self.table.alias}`."
 
         compact_str += self.name
+
         if self.aggregation != Aggregation.NONE:
             compact_str += ')'
         

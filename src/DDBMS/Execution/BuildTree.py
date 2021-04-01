@@ -1,3 +1,4 @@
+from numpy import isin
 from .Site import Site
 from DDBMS.Parser.SQLParser import *
 from DDBMS.RATree.Nodes import *
@@ -52,6 +53,7 @@ def SDDAlgorithm(col : Column, col_rows, table_rows, table_cols : List[Column]):
     return -(benefit + cost)
 
 def setBestJoinSite(node, children_cols, children_rows):
+
     predicate_cols = node.join_predicate.getAllColumns()
     if len(predicate_cols) == 1:
         predicate_cols.append(predicate_cols[0])
@@ -66,36 +68,56 @@ def setBestJoinSite(node, children_cols, children_rows):
         left_col = predicate_cols[1]
         right_col = predicate_cols[0]
     
+    node.join_cols = [left_col, right_col]
+    if node.children[0].site == node.children[1].site:
+        node.normal_join = True
+        return 
+        
     left_benefit = SDDAlgorithm(left_col, children_rows[0], children_rows[1], children_cols[1])
     right_benefit = SDDAlgorithm(right_col, children_rows[1], children_rows[0], children_cols[0])
 
     if left_benefit >= right_benefit:
         node.site = node.children[0].site
         node.semijoin_transfer_col = left_col
-        node.semijoin_transfer_child = 0
+        node.semijoin_transfer_child = 1
     else:
         node.site = node.children[1].site
         node.semijoin_transfer_col = right_col
-        node.semijoin_transfer_child = 1
+        node.semijoin_transfer_child = 0
+    
+
+def tempNameCols(node, predicate : Predicate):
+    for i, operand in enumerate(predicate.operands):
+        if isinstance(operand, Column):
+            idx = node.cols.index(operand)
+            predicate.operands[i] = node.cols[idx]
+        if isinstance(operand, Predicate):
+            tempNameCols(operand)
+
 
 operation_id = 0
 def getRowsAndExecutionSites(node):
     global operation_id
     node.operation_id = str(operation_id)
+    print("="*40, type(node), operation_id)
     
     if isinstance(node, RelationNode):
         node.site = getFragmentSite(node.name)
         cols = SQLQuery.get().filterCols(table=node.table)
+        cols = [SQLQuery.get().copyCol(col) for col in cols]
+        for col in cols:
+            col.temp_name = col.name
         node.cols = sorted(cols, key = lambda elem : elem.name)
         return [1000000000, node.cols]
 
     children_cols = []
+    children_cols_not_flattened = []
     children_rows = []
-    print("="*40, operation_id)
     for child in node.children:
         operation_id += 1
         [child_rows, child_cols] = getRowsAndExecutionSites(child)
         children_rows.append(child_rows)
+        children_cols_not_flattened.append(child_cols)
         for col in child_cols:
             if col not in children_cols:
                 children_cols.append(col)
@@ -105,32 +127,55 @@ def getRowsAndExecutionSites(node):
     node.site = node.children[best_execution_site_idx].site
     node.cols = children_cols
 
+    num_rows = max_child_rows
+        
     if isinstance(node, SelectNode):
+        tempNameCols(node, node.predicate)
         predicate_selectivity = getPredicateSelectivity(node.predicate)
-        return [max_child_rows * predicate_selectivity, node.cols]
+        num_rows = max_child_rows * predicate_selectivity
     
     if isinstance(node, GroupbyNode):
-        return [max_child_rows / 2, node.cols]
-
-    if isinstance(node, UnionNode):
-        return [sum(children_rows), node.cols]
-    
-    if isinstance(node, CrossNode):
-        node.cols = children_cols
-        return [math.prod(children_rows), node.cols]
+        num_rows = max_child_rows / 2
 
     if isinstance(node, ProjectNode) or isinstance(node, FinalProjectNode):
-        node.cols = sorted(list(set(node.columns)), key = lambda elem : elem.name)
-        return [max_child_rows, node.cols]
+        node.cols = []
+        for col in children_cols:
+            if col in node.columns:
+                node.cols.append(col)
+
+        num_rows = max_child_rows
+
+    if isinstance(node, UnionNode):
+        num_rows = sum(children_rows)
+
+    if isinstance(node, CrossNode):
+        num_rows = math.prod(children_rows)
     
     if isinstance(node, JoinNode):
-        node.cols = children_cols
-        setBestJoinSite(node, children_cols, children_rows)
-        return [math.prod(children_rows) * Config.SELECTIVITY_FACTOR, node.cols]
+        tempNameCols(node, node.join_predicate)
+        setBestJoinSite(node, children_cols_not_flattened, children_rows)
+        num_rows = math.prod(children_rows) * Config.SELECTIVITY_FACTOR
+    
+    if isinstance(node, (UnionNode, CrossNode, JoinNode)):
+        node.cols = [SQLQuery.get().copyCol(col) for col in node.cols]
 
-    return [max_child_rows, node.cols]
+        col_map = {}
+        for col in node.cols:
+            name = f"{col.table.name}_{col.name}"
+            if name in col_map:
+                col_map[name].append(col)
+            else:
+                col_map[name] = [col]
+        
+        for name in col_map:
+            for i, col in enumerate(col_map[name]):
+                col.temp_name = f"{col.table.name}_{col.name}_{i}"
+        
+
+    return [num_rows, node.cols]
 
 def buildTree(sql_query : str):
+    global operation_id
     SQLQuery.reset()
     parser = SQLParser()
     parser.parse(sql_query)

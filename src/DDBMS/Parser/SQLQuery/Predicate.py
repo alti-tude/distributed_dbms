@@ -35,7 +35,7 @@ class Predicate(BasePrimitive):
         return self.operator
     
     #TODO display NOT differently
-    def compact_display(self):
+    def compact_display(self, temp_name=False):
         compact_str = "("
         for operand in self.operands:
             if compact_str != "(":
@@ -46,6 +46,8 @@ class Predicate(BasePrimitive):
                     compact_str += f"'{operand}'"
                 else:
                     compact_str += f"{operand}"
+            elif isinstance(operand, Column):
+                compact_str += operand.compact_display(temp_name)
             else:
                 compact_str += operand.compact_display()
 

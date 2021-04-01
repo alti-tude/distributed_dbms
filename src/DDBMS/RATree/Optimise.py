@@ -4,7 +4,7 @@ from .RATreeBuilder import RATreeBuilder
 def optimise():
     ra_tree = RATreeBuilder()
     root = pushSelect(ra_tree.projected)
-    # root = combineSelectAndCross(root)
+    root = combineSelectAndCross(root)
     root = pushProject(root)
 
     #? Materialise handles reduce vertical

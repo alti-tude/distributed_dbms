@@ -199,6 +199,8 @@ class UnionNode(Node):
 class JoinNode(Node):
     def __init__(self, join_predicate, children = []) -> None:
         super().__init__(children=children)
+        self.normal_join = False
+        self.join_cols = []
         self.join_predicate : Predicate= join_predicate
         self.semijoin_transfer_col = None
         self.semijoin_transfer_child = None
@@ -247,7 +249,9 @@ class RelationNode(Node):
         output = {
             'Relation':{
                 'table': self.table.to_dict(),
-                'children': [child.to_dict() for child in self.children]
+                'children': [child.to_dict() for child in self.children],
+                'cols': self.cols,
+                'parent': self.parent.compact_display()
             }
         }
 

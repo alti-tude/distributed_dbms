@@ -16,7 +16,10 @@ import requests
 import time
 
 def getTempTableName(query_id, operation_id):
-    return f"{query_id}_{operation_id}_{Site.CUR_SITE.name}"
+    if Config.LOCAL_SERVERS:
+        return f"{query_id}_{operation_id}_{Site.CUR_SITE.name}"
+    else:
+        return f"{query_id}_{operation_id}"
 
 def encodeFn(data):
     binary = pickle.dumps(data, fix_imports=True)
@@ -44,7 +47,7 @@ def send(site : Site, query_id, operation_id, columns : List[Column], data = Non
     if response.status_code != 200:
         raise Exception(response.text)
 
-def put(query_id, operation_id, data, columns, decode = True):
+def put(query_id, operation_id, data, columns, nameFn = None, decode = True):
     table_name = getTempTableName(query_id, operation_id)
     if decode:
         data = decodeFn(data)
@@ -58,8 +61,11 @@ def put(query_id, operation_id, data, columns, decode = True):
         print("[put]", data)
         print("[put]", columns)
 
+    if nameFn is None:
+        nameFn = lambda col : f"{col.temp_name}"
+
     dropTable(table_name + "_tmp")
-    createTable(table_name + "_tmp", columns, [f"{col.alias}" for col in columns])
+    createTable(table_name + "_tmp", columns, [nameFn(col) for col in columns])
     insertIntoTable(table_name + "_tmp", data)
     renameTable(table_name + "_tmp", table_name)
 

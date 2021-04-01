@@ -1,6 +1,5 @@
 import datetime
 
-from pandas._config import config
 from Config import DEBUG
 import pandas as pd
 from typing import List
@@ -72,8 +71,10 @@ def selectQuery(project_cols, from_table, where_predicate=None):
     for col in project_cols:
         if project_cols_str != "":
             project_cols_str += ", "
-        print(col)
-        project_cols_str += col.compact_display(from_table)
+        if isinstance(col, str): 
+            project_cols_str += col
+        else:
+            project_cols_str += col.temp_name
     
     from_table_str = from_table.name
     if where_predicate is not None and len(where_predicate.operands)!=0:
@@ -81,6 +82,15 @@ def selectQuery(project_cols, from_table, where_predicate=None):
         return "SELECT " + project_cols_str + " FROM `" + from_table_str + "` WHERE " + where_predicate_str + ";"
     else:
         return "SELECT " + project_cols_str + " FROM `" + from_table_str + "`;"
+
+
+@db.execute
+def join(table1, table2, col1, col2):
+    return f"SELECT * FROM `{table1.name}`, `{table2.name}` WHERE `{table1.name}`.{col1.temp_name} = `{table2.name}`.{col2.temp_name};"
+
+@db.execute
+def semijoinQuery(table, col_as_table, col1, col2):
+    return f"SELECT DISTINCT `{table.name}`.* FROM `{table.name}`, `{col_as_table.name}` WHERE `{table.name}`.{col1.temp_name} = `{col_as_table.name}`.{col2.temp_name};"
 
 @db.execute
 def unionQuery(tables):
