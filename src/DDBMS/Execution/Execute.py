@@ -41,11 +41,11 @@ def execute(cur_node : Node, query_id):
             if isinstance(cur_node, CrossNode):
                 executeCross(cur_node, query_id, cur_node.operation_id)
             if isinstance(cur_node, JoinNode):
-                tables = [
-                    DataTransfer.get(query_id, cur_node.children[0].operation_id), 
-                    DataTransfer.get(query_id, cur_node.children[1].operation_id)
-                ]
                 if cur_node.normal_join:
+                    tables = [
+                        DataTransfer.get(query_id, cur_node.children[0].operation_id), 
+                        DataTransfer.get(query_id, cur_node.children[1].operation_id)
+                    ]
                     t1 = tables[0]
                     t2 = tables[1]
                     with db.returnLists():
@@ -82,16 +82,12 @@ def execute(cur_node : Node, query_id):
                     executeSelect(child, query_id, child.operation_id)
                     DataTransfer.send(other_site, query_id, child.operation_id, child.cols)
 
-            if isinstance(cur_node, JoinNode) and not cur_node.normal_join:
-                tables = [
-                    DataTransfer.get(query_id, cur_node.children[0].operation_id), 
-                    DataTransfer.get(query_id, cur_node.children[1].operation_id)
-                ]
+            if isinstance(cur_node, JoinNode) and not cur_node.normal_join and cur_node.children[cur_node.semijoin_transfer_child].site == Site.CUR_SITE:
                 other_child_idx = 1-cur_node.semijoin_transfer_child
                 other_site = cur_node.children[other_child_idx].site
                 other_col_as_table = DataTransfer.get(query_id, cur_node.operation_id + "_1")
                 
-                current_table = tables[1-other_child_idx]
+                current_table = DataTransfer.get(query_id, cur_node.children[1-other_child_idx].operation_id)
                 current_cols = cur_node.children[1-other_child_idx]
                 with db.returnLists():
                     semijoined_data = DBUtils.semijoinQuery(current_table, other_col_as_table, cur_node.join_cols[1-other_child_idx], cur_node.join_cols[other_child_idx])
