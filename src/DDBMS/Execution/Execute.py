@@ -41,9 +41,13 @@ def execute(cur_node : Node, query_id):
             if isinstance(cur_node, CrossNode):
                 executeCross(cur_node, query_id, cur_node.operation_id)
             if isinstance(cur_node, JoinNode):
+                tables = [
+                    DataTransfer.get(query_id, cur_node.children[0].operation_id), 
+                    DataTransfer.get(query_id, cur_node.children[1].operation_id)
+                ]
                 if cur_node.normal_join:
-                    t1 = DataTransfer.get(query_id, cur_node.children[0].operation_id)
-                    t2 = DataTransfer.get(query_id, cur_node.children[1].operation_id)
+                    t1 = tables[0]
+                    t2 = tables[1]
                     with db.returnLists():
                         data = DBUtils.join(t1, t2, *cur_node.join_cols)
                     DataTransfer.put(query_id, cur_node.operation_id, data, cur_node.cols, decode=False)
@@ -79,11 +83,15 @@ def execute(cur_node : Node, query_id):
                     DataTransfer.send(other_site, query_id, child.operation_id, child.cols)
 
             if isinstance(cur_node, JoinNode) and not cur_node.normal_join:
+                tables = [
+                    DataTransfer.get(query_id, cur_node.children[0].operation_id), 
+                    DataTransfer.get(query_id, cur_node.children[1].operation_id)
+                ]
                 other_child_idx = 1-cur_node.semijoin_transfer_child
                 other_site = cur_node.children[other_child_idx].site
                 other_col_as_table = DataTransfer.get(query_id, cur_node.operation_id + "_1")
                 
-                current_table = cur_node.children[1-other_child_idx].table
+                current_table = tables[1-other_child_idx]
                 current_cols = cur_node.children[1-other_child_idx]
                 with db.returnLists():
                     semijoined_data = DBUtils.semijoinQuery(current_table, other_col_as_table, cur_node.join_cols[1-other_child_idx], cur_node.join_cols[other_child_idx])
