@@ -88,7 +88,7 @@ def execute(cur_node : Node, query_id):
                 other_col_as_table = DataTransfer.get(query_id, cur_node.operation_id + "_1")
                 
                 current_table = DataTransfer.get(query_id, cur_node.children[1-other_child_idx].operation_id)
-                current_cols = cur_node.children[1-other_child_idx]
+                current_cols = cur_node.children[1-other_child_idx].cols
                 with db.returnLists():
                     semijoined_data = DBUtils.semijoinQuery(current_table, other_col_as_table, cur_node.join_cols[1-other_child_idx], cur_node.join_cols[other_child_idx])
                 DataTransfer.send(other_site, query_id, cur_node.operation_id + "_2", current_cols, semijoined_data)
