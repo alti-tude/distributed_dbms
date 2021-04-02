@@ -1,10 +1,10 @@
 INSERT INTO Theater (TheaterID, Location, NumScreens)
-VALUES  (5, "Mumbai", 1),
-        (6, "Mumbai", 1);
+VALUES  (5, "Delhi", 1),
+        (6, "Delhi", 1);
 
 INSERT INTO Screen (ScreenID, TheaterID, ScreenName, NumSeats)
-VALUES  (5, 5, "MumbaiScreen1", 4),
-        (6, 6, "MumbaiScreen2", 4);
+VALUES  (5, 5, "DelhiScreen1", 4),
+        (6, 6, "DelhiScreen2", 4);
 
 INSERT INTO Screening (ShowID, MovieID, ScreenID, Time, Price)
 VALUE   (5, 1, 5, '2015-11-05 14:29:31',100.35),

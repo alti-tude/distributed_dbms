@@ -1,10 +1,13 @@
+from DDBMS.Parser.SQLQuery.Table import Table
+from DDBMS.DB.DB import DB
 from DDBMS.Execution import Site
 from DDBMS.Execution.DataTransfer import getTempTableName
+from DDBMS.DB import DBUtils, db
 from flask import request, Response, Blueprint
 import requests
 
 import uuid
-import random
+import pandas as pd
 
 from Config import DEBUG
 
@@ -39,7 +42,9 @@ def result():
     if DEBUG:
         print(id)
     
-    if random.random() > 0.5:
+    if not DBUtils.tableExists(id):
         return Response(status=404)
-    
-    return Response("final", status=200)
+
+    df : pd.DataFrame = DBUtils.selectQuery(Table(id))
+
+    return df.to_dict()

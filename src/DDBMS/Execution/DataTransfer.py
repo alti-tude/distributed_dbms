@@ -6,7 +6,7 @@ from DDBMS.DB import db
 from DDBMS.Parser.SQLQuery.Column import Column
 from DDBMS.Execution.Site import Site
 import Config
-from Api import Routes
+from . import Routes
 
 from typing import List
 import pandas as pd

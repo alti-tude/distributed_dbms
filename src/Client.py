@@ -2,6 +2,7 @@ import requests
 import time
 
 import argparse
+import pandas as pd
 
 retry_delay = 1
 parser = argparse.ArgumentParser()
@@ -24,13 +25,13 @@ while True:
         id = response["id"]
 
         print(result_url)
-        # response = requests.get(result_url, params={"id": id})
-        # while response.status_code == 404:
-        #     response = requests.get(result_url, params={"id": id})
-        #     time.sleep(retry_delay)
+        response = requests.get(result_url, params={"id": id})
+        while response.status_code != 200:
+            response = requests.get(result_url, params={"id": id})
+            time.sleep(retry_delay)
             
-        # print(response.text)
+        return pd.DataFrame(response.json())
 
-    getData(query)
+    print(getData(query))
 
 
