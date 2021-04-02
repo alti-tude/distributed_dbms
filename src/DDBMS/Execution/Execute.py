@@ -55,7 +55,7 @@ def execute(cur_node : Node, query_id):
             for child in cur_node.children:
                 if child.site == Site.CUR_SITE:
                     executeSelect(child, query_id, child.operation_id)
-                    
+
             if cur_node.child_sites[0] == Site.CUR_SITE:
                 #send col
                 send_col_obj = cur_node.predicate_cols[0]
@@ -70,6 +70,11 @@ def execute(cur_node : Node, query_id):
                 recv_col_as_table = DataTransfer.get(query_id, cur_node.operation_id + "_1")
                 
                 #semijoin
+                with db.returnStrings():
+                    semijoin_data = DBUtils\
+                                .semijoinQuery(cur_table, recv_col_as_table, cur_node.predicate_cols[1], cur_node.predicate_cols[0])
+                    print(semijoin_data)
+                    
                 with db.returnLists():
                     semijoin_data = DBUtils\
                                 .semijoinQuery(cur_table, recv_col_as_table, cur_node.predicate_cols[1], cur_node.predicate_cols[0])
