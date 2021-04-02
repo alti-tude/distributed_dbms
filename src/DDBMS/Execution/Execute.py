@@ -1,6 +1,6 @@
 
+from mo_dots.datas import Data
 from DDBMS.DB import DBUtils, db
-from Config import DEBUG
 from DDBMS.Execution.Local.Cross import executeCross
 from DDBMS.Execution.Local.Union import executeUnion
 from DDBMS.Parser.SQLQuery.Table import Table
@@ -28,7 +28,7 @@ def execute(cur_node : Node, query_id):
     if isinstance(cur_node, ProjectNode) or isinstance(cur_node, SelectNode):
         return
 
-    if isinstance(cur_node, (UnionNode, CrossNode, JoinNode, FinalProjectNode)):
+    if isinstance(cur_node, (UnionNode, CrossNode, FinalProjectNode)):
         if cur_node.site == Site.CUR_SITE:
             for child in cur_node.children:
                 if child.site == Site.CUR_SITE:
@@ -40,39 +40,6 @@ def execute(cur_node : Node, query_id):
                 executeUnion(cur_node, query_id, cur_node.operation_id)
             if isinstance(cur_node, CrossNode):
                 executeCross(cur_node, query_id, cur_node.operation_id)
-            if isinstance(cur_node, JoinNode):
-                if cur_node.normal_join:
-                    tables = [
-                        DataTransfer.get(query_id, cur_node.children[0].operation_id), 
-                        DataTransfer.get(query_id, cur_node.children[1].operation_id)
-                    ]
-                    t1 = tables[0]
-                    t2 = tables[1]
-                    with db.returnLists():
-                        data = DBUtils.join(t1, t2, *cur_node.join_cols)
-                    DataTransfer.put(query_id, cur_node.operation_id, data, cur_node.cols, decode=False)
-                else:
-                    other_child_idx = cur_node.semijoin_transfer_child
-                    current_table = DataTransfer.get(query_id, cur_node.children[1-other_child_idx].operation_id)
-
-                    print(cur_node.semijoin_transfer_col.temp_name)
-                    with db.returnStrings():
-                        col_to_send = DBUtils.selectQuery([cur_node.semijoin_transfer_col], current_table)
-                        print(col_to_send)
-                    with db.returnLists():
-                        col_to_send = DBUtils.selectQuery([cur_node.semijoin_transfer_col], current_table)
-
-                    print(col_to_send)
-                    other_site = cur_node.children[other_child_idx].site
-                    DataTransfer.send(other_site, query_id, cur_node.operation_id + "_1", [cur_node.semijoin_transfer_col], col_to_send)
-
-                    other_table = DataTransfer.get(query_id, cur_node.operation_id + "_2")
-
-                    with db.returnLists():
-                        data = DBUtils.join(current_table, other_table, cur_node.join_cols[1-other_child_idx], cur_node.join_cols[other_child_idx])
-                    
-                    DataTransfer.put(query_id, cur_node.operation_id, data, cur_node.cols, decode=False)
-
             if isinstance(cur_node, FinalProjectNode):
                 executeSelect(cur_node, query_id, cur_node.operation_id)
         else:
@@ -81,20 +48,43 @@ def execute(cur_node : Node, query_id):
                 if child.site == Site.CUR_SITE:
                     executeSelect(child, query_id, child.operation_id)
                     DataTransfer.send(other_site, query_id, child.operation_id, child.cols)
-
-            if isinstance(cur_node, JoinNode) and not cur_node.normal_join and cur_node.children[cur_node.semijoin_transfer_child].site == Site.CUR_SITE:
-                other_child_idx = 1-cur_node.semijoin_transfer_child
-                other_site = cur_node.children[other_child_idx].site
-                other_col_as_table = DataTransfer.get(query_id, cur_node.operation_id + "_1")
-                
-                current_table = DataTransfer.get(query_id, cur_node.children[1-other_child_idx].operation_id)
-                current_cols = cur_node.children[1-other_child_idx].cols
+    
+    elif isinstance(cur_node, JoinNode):
+        if Site.CUR_SITE in cur_node.child_sites:
+            if cur_node.child_sites[0] == Site.CUR_SITE:
+                #send col
+                send_col_obj = cur_node.predicate_cols[0]
+                send_from_table = DataTransfer.get(query_id, cur_node.children[0].operation_id)
                 with db.returnLists():
-                    semijoined_data = DBUtils.semijoinQuery(current_table, other_col_as_table, cur_node.join_cols[1-other_child_idx], cur_node.join_cols[other_child_idx])
-                DataTransfer.send(other_site, query_id, cur_node.operation_id + "_2", current_cols, semijoined_data)
+                    send_col_data = DBUtils.selectQuery([send_col_obj], send_from_table)
+                DataTransfer.send(cur_node.child_sites[1], query_id, cur_node.operation_id+"_1", [send_col_obj], send_col_data)
+
+            if cur_node.child_sites[1] == Site.CUR_SITE:
+                #recv col
+                cur_table = DataTransfer.get(query_id, cur_node.children[1].operation_id)
+                recv_col_as_table = DataTransfer.get(query_id, cur_node.operation_id + "_1")
+                
+                #semijoin
+                with db.returnLists():
+                    semijoin_data = DBUtils\
+                                .semijoinQuery(cur_table, recv_col_as_table, cur_node.predicate_cols[1], cur_node.predicate_cols[0])
+                
+                #send joined table
+                DataTransfer.send(cur_node.child_sites[0], query_id, cur_node.operation_id + "_2", cur_node.children[1].cols, semijoin_data)
+
+            if cur_node.child_sites[0] == Site.CUR_SITE:
+                #recv table
+                cur_table = DataTransfer.get(query_id, cur_node.children[0].operation_id)
+                recvd_table = DataTransfer.get(query_id, cur_node.operation_id + "_2")
+
+                #join
+                with db.returnLists():
+                    data = DBUtils.join(cur_table, recvd_table, cur_node.predicate_cols[0], cur_node.predicate_cols[1])
+                #put table
+                DataTransfer.put(query_id, cur_node.operation_id, data, cur_node.cols, decode=False)
+
 
     #TODO handle groupby
-    #TODO handle naming of columns (duplicates in case of joins or cross between 2 tables having same nodes)
     #TODO handle join
 
     new_node = RelationNode(Table(getTempTableName(query_id, cur_node.operation_id)))    

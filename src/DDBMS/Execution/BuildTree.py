@@ -1,3 +1,4 @@
+from DDBMS.Execution.DataTransfer import getTempTableName
 from numpy import isin
 from .Site import Site
 from DDBMS.Parser.SQLParser import *
@@ -52,7 +53,7 @@ def SDDAlgorithm(col : Column, col_rows, table_rows, table_cols : List[Column]):
 
     return -(benefit + cost)
 
-def setBestJoinSite(node, children_cols, children_rows):
+def setBestJoinSite(node, children_cols, children_rows, query_id):
 
     predicate_cols = node.join_predicate.getAllColumns()
     if len(predicate_cols) == 1:
@@ -68,23 +69,18 @@ def setBestJoinSite(node, children_cols, children_rows):
         left_col = predicate_cols[1]
         right_col = predicate_cols[0]
     
-    node.join_cols = [left_col, right_col]
-    if node.children[0].site == node.children[1].site:
-        node.normal_join = True
-        return 
-        
     left_benefit = SDDAlgorithm(left_col, children_rows[0], children_rows[1], children_cols[1])
     right_benefit = SDDAlgorithm(right_col, children_rows[1], children_rows[0], children_cols[0])
 
-    if left_benefit >= right_benefit:
-        node.site = node.children[0].site
-        node.semijoin_transfer_col = left_col
-        node.semijoin_transfer_child = 1
-    else:
-        node.site = node.children[1].site
-        node.semijoin_transfer_col = right_col
-        node.semijoin_transfer_child = 0
-    
+    if left_benefit < right_benefit:
+        node.children = reversed(node.children)
+        left_benefit, right_benefit = right_benefit, left_benefit
+        left_col, right_col = right_col, left_col
+
+    node.child_temp_tables = [Table(getTempTableName(query_id, child.operation_id)) for child in node.children]
+    node.child_sites = [child.site for child in node.children]
+    node.predicate_cols = [left_col, right_col]
+    node.cols = children_cols[0] + children_cols[1]
 
 def tempNameCols(node, predicate : Predicate):
     for i, operand in enumerate(predicate.operands):
@@ -96,7 +92,7 @@ def tempNameCols(node, predicate : Predicate):
 
 
 operation_id = 0
-def getRowsAndExecutionSites(node):
+def getRowsAndExecutionSites(node, query_id):
     global operation_id
     node.operation_id = str(operation_id)
     print("="*40, type(node), operation_id)
@@ -115,7 +111,7 @@ def getRowsAndExecutionSites(node):
     children_rows = []
     for child in node.children:
         operation_id += 1
-        [child_rows, child_cols] = getRowsAndExecutionSites(child)
+        [child_rows, child_cols] = getRowsAndExecutionSites(child, query_id)
         children_rows.append(child_rows)
         children_cols_not_flattened.append(child_cols)
         for col in child_cols:
@@ -153,7 +149,7 @@ def getRowsAndExecutionSites(node):
     
     if isinstance(node, JoinNode):
         tempNameCols(node, node.join_predicate)
-        setBestJoinSite(node, children_cols_not_flattened, children_rows)
+        setBestJoinSite(node, children_cols_not_flattened, children_rows, query_id)
         num_rows = math.prod(children_rows) * Config.SELECTIVITY_FACTOR
     
     if isinstance(node, (UnionNode, CrossNode, JoinNode)):
@@ -174,7 +170,7 @@ def getRowsAndExecutionSites(node):
 
     return [num_rows, node.cols]
 
-def buildTree(sql_query : str):
+def buildTree(sql_query : str, query_id):
     global operation_id
     SQLQuery.reset()
     parser = SQLParser()
@@ -187,7 +183,7 @@ def buildTree(sql_query : str):
         tree.show()
 
     operation_id = 0
-    getRowsAndExecutionSites(root)         
+    getRowsAndExecutionSites(root, query_id)         
     
     if Config.DEBUG:
         tree = Tree()

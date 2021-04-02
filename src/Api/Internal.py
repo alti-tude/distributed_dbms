@@ -24,7 +24,7 @@ def internalQuery():
         print(query, id)
 
     try:
-        root = buildTree(query)
+        root = buildTree(query, id)
 
         pid = os.fork()
         if pid == 0:

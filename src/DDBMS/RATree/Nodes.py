@@ -199,11 +199,10 @@ class UnionNode(Node):
 class JoinNode(Node):
     def __init__(self, join_predicate, children = []) -> None:
         super().__init__(children=children)
-        self.normal_join = False
-        self.join_cols = []
+        self.child_temp_tables = []
+        self.child_sites = []
         self.join_predicate : Predicate= join_predicate
-        self.semijoin_transfer_col = None
-        self.semijoin_transfer_child = None
+        self.predicate_cols = []
 
     def to_dict(self):
         output = {
