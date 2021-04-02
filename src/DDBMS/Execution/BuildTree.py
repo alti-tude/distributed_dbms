@@ -54,7 +54,7 @@ def SDDAlgorithm(col : Column, col_rows, table_rows, table_cols : List[Column]):
     return -(benefit + cost)
 
 def setBestJoinSite(node, children_cols, children_rows, query_id):
-    ccols = [elem for elem in children_cols]
+    ccols = [[SQLQuery.get().copyCol(col) for col in elem] for elem in children_cols]
 
     predicate_cols = node.join_predicate.getAllColumns()
     if len(predicate_cols) == 1:
