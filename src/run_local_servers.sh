@@ -1,2 +1,2 @@
 export SITE=$1
-python Server.py
+python3 Server.py

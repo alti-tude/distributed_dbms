@@ -13,9 +13,9 @@ SERVER_DB_CONFIG = {
     "database": "Samosa",
 }
 
-ConfigToUse = LOCAL_DB_CONFIG
+ConfigToUse = SERVER_DB_CONFIG
 GET_RETRY_DELAY = 0.1 #in seconds
 SELECTIVITY_FACTOR = 0.3
 
 DEBUG = True
-LOCAL_SERVERS = True
+LOCAL_SERVERS = False
