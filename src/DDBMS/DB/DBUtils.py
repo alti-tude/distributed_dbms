@@ -77,7 +77,7 @@ def selectQuery(project_cols, from_table, where_predicate=None):
                 project_cols_str += ", "
             if isinstance(col, str): 
                 project_cols_str += col
-            elif col.aggregation != Aggregation.NONE:
+            elif col.aggregation != "none":
                 project_cols_str += col.aggregation + "(" + col.temp_name + ")"
             else:
                 project_cols_str += col.temp_name
