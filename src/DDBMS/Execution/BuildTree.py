@@ -82,7 +82,7 @@ def setBestJoinSite(node, children_cols, children_rows, query_id):
     node.child_temp_tables = [Table(getTempTableName(query_id, child.operation_id)) for child in node.children]
     node.child_sites = [child.site for child in node.children]
     node.predicate_cols = [left_col, right_col]
-    ccols[1].pop(ccols[1].index(right_col))
+    # ccols[1].pop(ccols[1].index(right_col))
     node.cols = ccols[0] + ccols[1]
     
 
