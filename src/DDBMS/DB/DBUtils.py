@@ -1,3 +1,4 @@
+from DDBMS.Parser.SQLQuery.Symbols import Aggregation
 import datetime
 
 from Config import DEBUG
@@ -76,8 +77,10 @@ def selectQuery(project_cols, from_table, where_predicate=None):
                 project_cols_str += ", "
             if isinstance(col, str): 
                 project_cols_str += col
-            else:
+            elif col.aggregation != Aggregation.NONE:
                 project_cols_str += col.aggregation + "(" + col.temp_name + ")"
+            else:
+                project_cols_str += col.temp_name
     
     from_table_str = from_table.name
     if where_predicate is not None and len(where_predicate.operands)!=0:
