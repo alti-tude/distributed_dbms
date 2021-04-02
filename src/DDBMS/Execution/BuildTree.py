@@ -74,13 +74,16 @@ def setBestJoinSite(node, children_cols, children_rows, query_id):
 
     if left_benefit < right_benefit:
         node.children = list(reversed(node.children))
+        children_cols = list(reversed(children_cols))
         left_benefit, right_benefit = right_benefit, left_benefit
         left_col, right_col = right_col, left_col
 
     node.child_temp_tables = [Table(getTempTableName(query_id, child.operation_id)) for child in node.children]
     node.child_sites = [child.site for child in node.children]
     node.predicate_cols = [left_col, right_col]
+    children_cols[1].pop(children_cols[1].index(right_col))
     node.cols = children_cols[0] + children_cols[1]
+    
 
 def tempNameCols(node, predicate : Predicate):
     for i, operand in enumerate(predicate.operands):
