@@ -11,7 +11,7 @@ args = parser.parse_args()
 
 retry_delay = args.retry_delay
 
-query_url = f"http://localhost:12345/user/query"
+query_url = f"http://10.3.5.215:12345/user/query"
 
 while True:
     query = input("> ")
