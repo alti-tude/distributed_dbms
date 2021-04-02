@@ -73,7 +73,7 @@ def setBestJoinSite(node, children_cols, children_rows, query_id):
     right_benefit = SDDAlgorithm(right_col, children_rows[1], children_rows[0], children_cols[0])
 
     if left_benefit < right_benefit:
-        node.children = reversed(node.children)
+        node.children = list(reversed(node.children))
         left_benefit, right_benefit = right_benefit, left_benefit
         left_col, right_col = right_col, left_col
 
