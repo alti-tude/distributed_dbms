@@ -54,6 +54,7 @@ def SDDAlgorithm(col : Column, col_rows, table_rows, table_cols : List[Column]):
     return -(benefit + cost)
 
 def setBestJoinSite(node, children_cols, children_rows, query_id):
+    ccols = [elem for elem in children_cols]
 
     predicate_cols = node.join_predicate.getAllColumns()
     if len(predicate_cols) == 1:
@@ -62,27 +63,27 @@ def setBestJoinSite(node, children_cols, children_rows, query_id):
     left_col = None
     right_col = None
 
-    if predicate_cols[0] in children_cols[0]:
+    if predicate_cols[0] in ccols[0]:
         left_col = predicate_cols[0]
         right_col = predicate_cols[1]
     else:
         left_col = predicate_cols[1]
         right_col = predicate_cols[0]
     
-    left_benefit = SDDAlgorithm(left_col, children_rows[0], children_rows[1], children_cols[1])
-    right_benefit = SDDAlgorithm(right_col, children_rows[1], children_rows[0], children_cols[0])
+    left_benefit = SDDAlgorithm(left_col, children_rows[0], children_rows[1], ccols[1])
+    right_benefit = SDDAlgorithm(right_col, children_rows[1], children_rows[0], ccols[0])
 
     if left_benefit < right_benefit:
         node.children = list(reversed(node.children))
-        children_cols = list(reversed(children_cols))
+        ccols = list(reversed(ccols))
         left_benefit, right_benefit = right_benefit, left_benefit
         left_col, right_col = right_col, left_col
 
     node.child_temp_tables = [Table(getTempTableName(query_id, child.operation_id)) for child in node.children]
     node.child_sites = [child.site for child in node.children]
     node.predicate_cols = [left_col, right_col]
-    children_cols[1].pop(children_cols[1].index(right_col))
-    node.cols = children_cols[0] + children_cols[1]
+    ccols[1].pop(ccols[1].index(right_col))
+    node.cols = ccols[0] + ccols[1]
     
 
 def tempNameCols(node, predicate : Predicate):
