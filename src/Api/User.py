@@ -45,6 +45,6 @@ def result():
     if not DBUtils.tableExists(id):
         return Response(status=404)
 
-    df : pd.DataFrame = DBUtils.selectQuery(Table(id))
+    df : pd.DataFrame = DBUtils.selectQuery(project_cols=[], from_table=Table(id))
 
     return df.to_dict()
