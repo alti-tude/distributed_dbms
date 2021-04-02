@@ -1,4 +1,3 @@
-from DDBMS.Parser.SQLQuery.Symbols import Aggregation
 import datetime
 
 from Config import DEBUG
