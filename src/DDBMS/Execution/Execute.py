@@ -50,7 +50,12 @@ def execute(cur_node : Node, query_id):
                     DataTransfer.send(other_site, query_id, child.operation_id, child.cols)
     
     elif isinstance(cur_node, JoinNode):
+
         if Site.CUR_SITE in cur_node.child_sites:
+            for child in cur_node.children:
+                if child.site == Site.CUR_SITE:
+                    executeSelect(child, query_id, child.operation_id)
+                    
             if cur_node.child_sites[0] == Site.CUR_SITE:
                 #send col
                 send_col_obj = cur_node.predicate_cols[0]
