@@ -1,3 +1,4 @@
+from DDBMS.CommitProtocol import Master
 from DDBMS.Parser.SQLQuery.Table import Table
 from DDBMS.DB.DB import DB
 from DDBMS.Execution import Site
@@ -21,7 +22,6 @@ def query():
     
     query = request.args["query"]
     
-    #TODO replace with new site object instead of config hardcode
     for site in Site.ALL_SITES:
         forward_url = f"{site.getUrl()}/internal/query"
         response = requests.get(forward_url, params={"query": query, "id": id})
@@ -48,3 +48,13 @@ def result():
     df : pd.DataFrame = DBUtils.selectQuery(project_cols=[], from_table=Table(id))
 
     return df.to_dict()
+
+
+@bp.route("/update", methods=["GET", "POST"])
+def update():
+    id = str(uuid.uuid4())
+    query = request.args["id"]
+
+    if Master.twoPC(id, query):
+        return Response(status=200)
+    return Response(status=400)
