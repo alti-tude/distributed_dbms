@@ -95,8 +95,6 @@ def execute(cur_node : Node, query_id):
 
 
     #TODO handle groupby
-    #TODO handle join
-
     new_node = RelationNode(Table(getTempTableName(query_id, cur_node.operation_id)))    
     if cur_node.parent is not None:
         cur_node.parent.replaceChild(cur_node, new_node)

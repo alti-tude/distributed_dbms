@@ -1,4 +1,3 @@
-import traceback
 from pandas.core.frame import DataFrame
 from DDBMS.Parser.SQLQuery.Table import Table
 from DDBMS.DB.DBUtils import createTable, dropTable, insertIntoTable, renameTable, selectQuery, tableExists
@@ -6,7 +5,7 @@ from DDBMS.DB import db
 from DDBMS.Parser.SQLQuery.Column import Column
 from DDBMS.Execution.Site import Site
 import Config
-from . import Routes
+from DDBMS import Routes
 
 from typing import List
 import pandas as pd

@@ -109,3 +109,12 @@ def unionQuery(tables):
 @db.execute
 def crossQuery(table1, table2):
     return "SELECT * FROM `" + table1.name + "`, `" + table2.name + "`;"
+
+
+@db.execute_commit
+def directExecuteCommit(query):
+    return query
+
+@db.execute
+def directExecute(query):
+    return query
