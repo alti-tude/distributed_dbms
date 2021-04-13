@@ -20,6 +20,7 @@ def globalAbort(id):
     
 
 def twoPC(id, query):
+    print("Beginning 2PC")
     logger.info("[{id}] begin commit")
 
     #send prepare
