@@ -42,6 +42,7 @@ def deleteTempTables():
 
 @db.execute_commit
 def renameTable(oname, nname):
+    __temp_tables.append(nname)
     return f"rename table `{oname}` to `{nname}`;"
 
 @db.execute_commit
