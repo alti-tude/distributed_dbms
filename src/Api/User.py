@@ -47,7 +47,7 @@ def result():
 
     df : pd.DataFrame = DBUtils.selectQuery(project_cols=[], from_table=Table(id))
 
-    deleteTempTables()
+    DBUtils.deleteTempTables()
     return df.to_dict()
 
 
