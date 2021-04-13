@@ -24,6 +24,8 @@ def executeSelect(root : Node, query_id, operation_id):
                 if col.temp_name not in col_temp_names:
                     cols.append(col)
                     col_temp_names.append(col.temp_name)
+            print("TEMP NAMES:", col_temp_names)
+            print(cur_node.columns)
 
         if isinstance(cur_node, SelectNode):
             predicates.append(cur_node.predicate)
