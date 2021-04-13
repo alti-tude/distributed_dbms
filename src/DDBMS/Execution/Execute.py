@@ -101,3 +101,6 @@ def execute(cur_node : Node, query_id):
         new_node.site = cur_node.site
         new_node.operation_id = cur_node.operation_id
         new_node.cols = cur_node.cols
+    
+    if isinstance(cur_node, FinalProjectNode) and cur_node.site != Site.CUR_SITE:
+        deleteTempTables()

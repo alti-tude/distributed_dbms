@@ -5,6 +5,8 @@ import pandas as pd
 from typing import List
 from DDBMS.DB import db
 
+__temp_tables = []
+
 @db.execute
 def queryFragmentSite(fragment_name):
     return "SELECT SiteID FROM LocalMapping WHERE FragmentID = '" + fragment_name + "';"
@@ -29,7 +31,12 @@ def dropTable(table_name):
 def createTable(table_name, columns, col_names : List[str]):
     if DEBUG: print("="*20, table_name, col_names)
     cols = ','.join([f"{col_name} {col.data_type} " for col_name, col in zip(col_names, columns)])
+    __temp_tables.append(table_name)
     return f"create table `{table_name}` ({cols});"
+
+def deleteTempTables():
+    for table_name in __temp_tables:
+        dropTable(table_name)
 
 @db.execute_commit
 def renameTable(oname, nname):

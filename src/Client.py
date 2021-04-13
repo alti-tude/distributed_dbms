@@ -12,6 +12,7 @@ args = parser.parse_args()
 retry_delay = args.retry_delay
 
 query_url = f"http://10.3.5.215:12345/user/query"
+update_url = f"http://10.3.5.215:12345/user/update"
 
 while True:
     query = input("> ")
@@ -32,6 +33,7 @@ while True:
             
         return pd.DataFrame(response.json())
 
-    print(getData(query))
-
-
+    if "update" in query.lower().strip()[:6]:
+        response = requests.get(update_url, params={"query": query})
+    else:
+        print(getData(query))
