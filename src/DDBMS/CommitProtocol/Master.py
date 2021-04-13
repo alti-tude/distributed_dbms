@@ -38,7 +38,7 @@ def twoPC(id, query):
     logger.info("[{id}] commit")
     for site in Site.ALL_SITES:
         url = site.getUrl() + Routes.COMMIT.GLOBAL_COMMIT
-        request.get(url, params={"id": id})
+        requests.get(url, params={"id": id})
 
     logger.info("[{id}] end of transaction")
     return True
