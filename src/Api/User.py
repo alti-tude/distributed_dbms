@@ -54,7 +54,7 @@ def result():
 @bp.route("/update", methods=["GET", "POST"])
 def update():
     id = str(uuid.uuid4())
-    query = request.args["id"]
+    query = request.args["query"]
 
     if Master.twoPC(id, query):
         return Response(status=200)
