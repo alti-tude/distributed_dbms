@@ -138,7 +138,7 @@ def getRowsAndExecutionSites(node, query_id):
     if isinstance(node, GroupbyNode):
         num_rows = max_child_rows / 2
 
-    if isinstance(node, ProjectNode) or isinstance(node, FinalProjectNode):
+    if isinstance(node, FinalProjectNode):
         node.cols = []
         
         # for col in children_cols:
@@ -152,6 +152,15 @@ def getRowsAndExecutionSites(node, query_id):
             col.temp_name = children_cols[child_col_idx].temp_name
             col.aggregation = aggregation
             node.cols.append(col)
+
+        num_rows = max_child_rows
+    
+    if isinstance(node, ProjectNode):
+        node.cols = []
+        
+        for col in children_cols:
+            if col in node.columns:
+                node.cols.append(col)
 
         num_rows = max_child_rows
 
