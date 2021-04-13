@@ -2,6 +2,9 @@
 class Aggregation:
     NONE = "none"
     MAX = "max"
+    MIN = "min"
+    SUM = "sum"
+    AVERAGE = "avg"
 
 class PredicateOps:
     AND = "and"
