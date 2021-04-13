@@ -26,6 +26,7 @@ def twoPC(id, query):
     #send prepare
     for site in Site.ALL_SITES:
         url = site.getUrl() + Routes.COMMIT.PREPARE
+        print(url)
         try:
             response = requests.get(url, params={"id": id, "query": query}, timeout = Config.COMMIT_TIMEOUT)
             if response.status_code != 200:
