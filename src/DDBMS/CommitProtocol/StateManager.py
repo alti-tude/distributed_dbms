@@ -12,6 +12,7 @@ class States:
 
 class StateManager:
     def __init__(self) -> None:
+        os.mkdir(Config.COMMIT_STATE_FOLDER)
         self.state_folder = Config.COMMIT_STATE_FOLDER
     
     def filename(self, id):
