@@ -13,7 +13,7 @@ def globalAbort(id):
 
     for site in Site.ALL_SITES:
         url = site.getUrl() + Routes.COMMIT.GLOBAL_ABORT
-        requests.get(url, params={"id": id})
+        requests.get(url, params={"id": id}, timeout = Config.COMMIT_TIMEOUT)
     
     logger.info("[{id}] end of transaction")
     return False
