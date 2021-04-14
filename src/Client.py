@@ -22,6 +22,9 @@ while True:
     def getData(query):
         response = requests.get(query_url, params={"query": query})
         print(response)
+        if response.status_code != 200:
+            return "Invalid query"
+
         response = response.json()
         
         result_url = response["result_url"]
@@ -34,12 +37,18 @@ while True:
             response = requests.get(result_url, params={"id": id})
             time.sleep(retry_delay)
             retry_cnt += 1
-            
+        
+        if response.status_code != 200:
+            return "Request timed out"
         return pd.DataFrame(response.json())
 
     pd.set_option('display.expand_frame_repr', False)
     if "update" in query.lower().strip()[:6]:
         response = requests.get(update_url, params={"query": query})
         print(response)
+        if response.status_code == 200:
+            print("Update commited")
+        else:
+            print("Update aborted")
     else:
         print(getData(query))
