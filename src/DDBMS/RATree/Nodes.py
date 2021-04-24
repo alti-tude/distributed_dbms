@@ -180,7 +180,7 @@ class GroupbyNode(Node):
         for column in self.group_by_columns:
             if columns_str != "":
                 columns_str += ", "
-            columns_str += column.compact_display()
+            columns_str += column.temp_name
 
         if self.site is not None:
             return "GROUP BY: " + columns_str + f" {self.having_predicate.compact_display()}" + " (site: " + str(self.site) + ")" +str(self.operation_id)
