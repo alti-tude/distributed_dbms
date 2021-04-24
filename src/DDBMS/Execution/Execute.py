@@ -9,6 +9,7 @@ from . import DataTransfer
 from DDBMS.Execution.Site import Site
 from DDBMS.RATree.Nodes import CrossNode, FinalProjectNode, GroupbyNode, JoinNode, Node, ProjectNode, RelationNode, SelectNode, UnionNode
 from .Local.Select import executeSelect
+import Config
 
 def isSelectBranch(cur_node : Node):
     if isinstance(cur_node, RelationNode):
@@ -45,7 +46,21 @@ def execute(cur_node : Node, query_id):
                 if isinstance(child, GroupbyNode):
                     table_name = getTempTableName(query_id, child.operation_id)
                     with db.returnLists():
-                        data = DBUtils.selectQuery(cur_node.cols, table_name, group_by_cols=child.group_by_columns, having_predicate=child.having_predicate)
+                        data = DBUtils.selectQuery(
+                            cur_node.cols, 
+                            table_name, 
+                            group_by_cols=child.group_by_columns, 
+                            having_predicate=child.having_predicate
+                        )
+                    
+                    if Config.DEBUG:
+                        with db.returnStrings():
+                            print(DBUtils.selectQuery(
+                                cur_node.cols, 
+                                table_name, 
+                                group_by_cols=child.group_by_columns, 
+                                having_predicate=child.having_predicate
+                            ))
                     DataTransfer.put(query_id, cur_node.operation_id, data, cur_node.cols, decode=False)
                     
                 else:
