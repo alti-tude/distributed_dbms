@@ -1,3 +1,4 @@
+from typing import Union
 from DDBMS.Execution.DataTransfer import getTempTableName
 from numpy import isin
 from .Site import Site
@@ -87,11 +88,26 @@ def setBestJoinSite(node, children_cols, children_rows, query_id):
     node.cols = ccols[0] + ccols[1]
     
 
-def tempNameCols(node, predicate : Predicate):
-    for i, operand in enumerate(predicate.operands):
+def tempNameCols(node, col_store : Union[Predicate,List], agg_check = False):
+    if isinstance(col_store, list):
+        col_list = col_store
+    if isinstance(col_store, Predicate):
+        col_list = col_store.operands
+
+    for i, operand in enumerate(col_list):
         if isinstance(operand, Column):
+            if agg_check:
+                agg = operand.aggregation
+                operand.aggregation = Aggregation.NONE
+
             idx = node.cols.index(operand)
-            predicate.operands[i] = node.cols[idx]
+            if agg_check:
+                col_list[i] = SQLQuery.get().copyCol(node.cols[idx])
+                col_list[i].aggregation = agg
+            else:
+                col_list[i] = node.cols[idx]
+            
+
         if isinstance(operand, Predicate):
             tempNameCols(operand)
 
@@ -100,7 +116,6 @@ operation_id = 0
 def getRowsAndExecutionSites(node, query_id):
     global operation_id
     node.operation_id = str(operation_id)
-    print("="*40, type(node), operation_id)
     
     if isinstance(node, RelationNode):
         node.site = getFragmentSite(node.name)
@@ -161,13 +176,18 @@ def getRowsAndExecutionSites(node, query_id):
         tempNameCols(node, node.join_predicate)
         setBestJoinSite(node, children_cols_not_flattened, children_rows, query_id)
         num_rows = math.prod(children_rows) * Config.SELECTIVITY_FACTOR
-    
+
+    if isinstance(node, GroupbyNode):
+        tempNameCols(node, node.group_by_columns, True)
+        tempNameCols(node, node.having_predicate, True)
+        node.operation_id = node.children[0].operation_id
+
     if isinstance(node, (UnionNode, CrossNode, JoinNode)):
         node.cols = [SQLQuery.get().copyCol(col) for col in node.cols]
 
         col_map = {}
         for col in node.cols:
-            name = f"{col.table.name}_{col.name}"
+            name = f"{col.aggregation}_{col.table.name}_{col.name}"
             if name in col_map:
                 col_map[name].append(col)
             else:
@@ -175,8 +195,8 @@ def getRowsAndExecutionSites(node, query_id):
         
         for name in col_map:
             for i, col in enumerate(col_map[name]):
-                col.temp_name = f"{col.table.name}_{col.name}_{i}"
-        
+                col.temp_name = f"{col.aggregation}_{col.table.name}_{col.name}_{i}"
+    
 
     return [num_rows, node.cols]
 

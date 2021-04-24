@@ -66,7 +66,7 @@ def insertIntoTable(table_name, data, columns = None):
     return query
 
 @db.execute
-def selectQuery(project_cols, from_table, where_predicate=None):
+def selectQuery(project_cols, from_table, where_predicate=None, group_by_cols = None, having_predicate = None):
     if len(project_cols)==0:
         project_cols_str = "*"
     else:
@@ -82,12 +82,29 @@ def selectQuery(project_cols, from_table, where_predicate=None):
                 project_cols_str += col.temp_name
     
     from_table_str = from_table.name
+    base_query = "SELECT " + project_cols_str + " FROM `" + from_table_str + "`"
+    
     if where_predicate is not None and len(where_predicate.operands)!=0:
         where_predicate_str = where_predicate.compact_display()
-        return "SELECT " + project_cols_str + " FROM `" + from_table_str + "` WHERE " + where_predicate_str + ";"
-    else:
-        return "SELECT " + project_cols_str + " FROM `" + from_table_str + "`;"
+        base_query = base_query + " WHERE " + where_predicate_str
 
+    if group_by_cols is not None:
+        group_by_cols_str = ""
+        for col in group_by_cols:
+            if group_by_cols_str != "":
+                group_by_cols_str += ", "
+            if isinstance(col, str): 
+                group_by_cols_str += col
+            else:
+                group_by_cols_str += col.temp_name
+
+        base_query += f" GROUP BY {group_by_cols_str}"
+    
+    if having_predicate is not None and len(having_predicate.operands) != 0:
+        having_predicate_str = having_predicate.compact_display()
+        base_query += f" HAVING {having_predicate_str}"
+        
+    return base_query + ";"
 
 @db.execute
 def join(table1, table2, col1, col2):
