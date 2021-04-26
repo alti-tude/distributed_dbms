@@ -25,7 +25,8 @@ def optimizeProject(node):
                 child_cols = child.join_predicate.getAllColumns()
             new_project_cols = list(set(cols + child_cols))
 
-            if new_project_cols == cols:
+            intersection = set(new_project_cols).intersection(set(cols))
+            if len(intersection) == len(cols) and len(intersection) == len(new_project_cols):
                 delete_cur_node = True
             
             for i, grandchild in enumerate(child.children):
