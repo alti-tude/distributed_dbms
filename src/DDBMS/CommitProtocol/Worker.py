@@ -22,11 +22,11 @@ def prepareMsg(id, query):
 
 def globalAbortMsg(id):
     state_manager.setState(id, States.ABORT)
-    logging.info(f"[{id}] abort")
+    logger.info(f"[{id}] abort")
 
 def globalCommitMsg(id):
     state_manager.setState(id, States.COMMIT)
-    logging.info(f"[{id}] commit")
+    logger.info(f"[{id}] commit")
     
     query = state_manager.loadFile(id)["query"]
     DBUtils.directExecuteCommit(query)
