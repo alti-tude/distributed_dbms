@@ -26,7 +26,7 @@ def execute(cur_node : Node, query_id):
 
     list(map(lambda child : execute(child, query_id), cur_node.children))
 
-    if isinstance(cur_node, (ProjectNode, SelectNode, GroupbyNode)):
+    if isinstance(cur_node, (ProjectNode, SelectNode)):
         return
 
     if isinstance(cur_node, (UnionNode, CrossNode, FinalProjectNode)):
@@ -45,6 +45,7 @@ def execute(cur_node : Node, query_id):
                 child = cur_node.children[0]
                 if isinstance(child, GroupbyNode):
                     table_name = getTempTableName(query_id, child.operation_id)
+                    
                     with db.returnLists():
                         data = DBUtils.selectQuery(
                             cur_node.cols, 
@@ -53,14 +54,6 @@ def execute(cur_node : Node, query_id):
                             having_predicate=child.having_predicate
                         )
                     
-                    if Config.DEBUG:
-                        with db.returnStrings():
-                            print(DBUtils.selectQuery(
-                                cur_node.cols, 
-                                Table(table_name), 
-                                group_by_cols=child.group_by_columns, 
-                                having_predicate=child.having_predicate
-                            ))
                     DataTransfer.put(query_id, cur_node.operation_id, data, cur_node.cols, decode=False)
                     
                 else:
@@ -115,6 +108,9 @@ def execute(cur_node : Node, query_id):
                 #put table
                 DataTransfer.put(query_id, cur_node.operation_id, data, cur_node.cols, decode=False)
 
+
+    if isinstance(cur_node, GroupbyNode):
+        return
 
     #TODO handle groupby
     new_node = RelationNode(Table(getTempTableName(query_id, cur_node.operation_id)))    
