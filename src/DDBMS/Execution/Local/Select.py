@@ -23,8 +23,6 @@ def executeSelect(root : Node, query_id, operation_id):
         if isinstance(cur_node, ProjectNode) or isinstance(cur_node, FinalProjectNode):
             if cols is None:
                 cols = cur_node.cols
-            print("TEMP NAMES:", cols)
-            print(cur_node.columns)
 
         if isinstance(cur_node, SelectNode):
             predicates.append(cur_node.predicate)
@@ -33,10 +31,6 @@ def executeSelect(root : Node, query_id, operation_id):
 
     table = cur_node.table
     predicate = Predicate(PredicateOps.AND, operands=predicates)
-
-    if DEBUG:
-        with db.returnStrings():
-            print(DBUtils.selectQuery(cols, table, predicate))
     
     with db.returnLists():
         data = DBUtils.selectQuery(cols, table, predicate)
