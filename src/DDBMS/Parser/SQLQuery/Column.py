@@ -31,17 +31,16 @@ class Column(BasePrimitive):
         return output
     
     def compact_display(self, temp_name = False):
-        if temp_name:
-            return self.temp_name
-
         compact_str = ""
         
         if self.aggregation != Aggregation.NONE:
             compact_str += self.aggregation + '('
         
-        compact_str += f"`{self.table.alias}`."
-
-        compact_str += self.name
+        if temp_name:
+            compact_str += self.temp_name
+        else:
+            compact_str += f"`{self.table.alias}`."
+            compact_str += self.name
 
         if self.aggregation != Aggregation.NONE:
             compact_str += ')'
