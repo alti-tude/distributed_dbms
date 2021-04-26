@@ -30,6 +30,8 @@ class DB:
             
             query = query_function(*args, **kwargs)
 
+            if DEBUG: print(query)
+
             if self._return_strings: return query
 
             assert(isinstance(query,str))
@@ -54,6 +56,9 @@ class DB:
             cur = conn.cursor()
             
             query = query_function(*args, **kwargs)
+
+            if DEBUG: print(query)
+
             if self._return_strings: return query
             
             assert(isinstance(query,str))
