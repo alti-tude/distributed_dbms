@@ -35,8 +35,9 @@ def createTable(table_name, columns, col_names : List[str]):
     return f"create table `{table_name}` ({cols});"
 
 def deleteTempTables():
-    print("*"*20, "TO DELETE:")
-    print(__temp_tables)
+    if DEBUG:
+        print("*"*20, "TO DELETE:")
+        print(__temp_tables)
     for table_name in __temp_tables:
         dropTable(table_name)
 
