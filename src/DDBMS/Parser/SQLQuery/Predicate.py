@@ -29,7 +29,7 @@ class Predicate(BasePrimitive):
         elif self.operator == PredicateOps.LEQ:
             return "<="
         elif self.operator == PredicateOps.LT:
-            return ">"
+            return "<"
         elif self.operator == PredicateOps.NEQ:
             return "!="  
         return self.operator
