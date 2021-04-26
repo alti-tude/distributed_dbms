@@ -1,7 +1,11 @@
 from flask import Flask
 from flask.helpers import url_for
+import logging
 
 app = Flask(__name__)
+log = logging.getLogger('werkzeug')
+log.disabled = True
+
 
 from .User import bp as user_bp
 from .Internal import bp as internal_bp
