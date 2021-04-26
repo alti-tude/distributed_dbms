@@ -9,7 +9,7 @@ import Config
 logger = logging.getLogger(__name__)
 
 def globalAbort(id):
-    logger.info("[{id}] abort")
+    logger.info(f"[{id}] abort")
 
     for site in Site.ALL_SITES:
         url = site.getUrl() + Routes.COMMIT.GLOBAL_ABORT
@@ -18,13 +18,13 @@ def globalAbort(id):
         except:
             continue
 
-    logger.info("[{id}] end of transaction")
+    logger.info(f"[{id}] end of transaction")
     return False
     
 
 def twoPC(id, query):
     print("Beginning 2PC")
-    logger.info("[{id}] begin commit")
+    logger.info(f"[{id}] begin commit")
 
     #send prepare
     for site in Site.ALL_SITES:
@@ -38,10 +38,10 @@ def twoPC(id, query):
             return globalAbort(id)
 
     #send commit
-    logger.info("[{id}] commit")
+    logger.info(f"[{id}] commit")
     for site in Site.ALL_SITES:
         url = site.getUrl() + Routes.COMMIT.GLOBAL_COMMIT
         requests.get(url, params={"id": id})
 
-    logger.info("[{id}] end of transaction")
+    logger.info(f"[{id}] end of transaction")
     return True
