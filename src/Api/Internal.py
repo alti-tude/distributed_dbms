@@ -45,7 +45,7 @@ def internalQuery():
 @bp.route("/put", methods=["GET", "POST"])
 def put():
     payload = request.json
-    print("OWOWOWOWOWOWOWOWOWOWOOWOWOWOWOWOWOWO")
+    print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
     print(payload["query_id"], payload["operation_id"])
     DataTransfer.put(**payload)
     
