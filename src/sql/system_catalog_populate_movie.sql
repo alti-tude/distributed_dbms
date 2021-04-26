@@ -18,16 +18,11 @@ VALUES  ('Movie', 'MovieID', 'INT', 1),
         ('Theater', 'Location', 'VARCHAR(255)', 0),
         ('Theater', 'NumScreens', 'INT', 0),
 
-        ('Screen', 'ScreenID', 'INT', 1),
-        ('Screen', 'TheaterID', 'INT', 0),
-        ('Screen', 'ScreenName', 'VARCHAR(255)', 0),
-        ('Screen', 'NumSeats', 'INT', 0),
-
-        ('Show', 'ShowID', 'INT', 1),
-        ('Show', 'MovieID', 'INT', 0),
-        ('Show', 'ScreenID', 'INT', 0),
-        ('Show', 'Time', 'DATETIME', 0),
-        ('Show', 'Price', 'FLOAT(7,2)', 0),
+        ('Showing', 'ShowID', 'INT', 1),
+        ('Showing', 'MovieID', 'INT', 0),
+        ('Showing', 'TheaterID', 'INT', 0),
+        ('Showing', 'Time', 'DATETIME', 0),
+        ('Showing', 'Price', 'FLOAT(7,2)', 0),
 
         ('User', 'EMail', 'VARCHAR(255)', 1),
         ('User', 'Name', 'VARCHAR(255)', 0),
@@ -45,13 +40,9 @@ VALUES  ('Theater_D', 'H', 'Theater'),
         ('Theater_H', 'H', 'Theater'),
         ('Theater_M', 'H', 'Theater'),
 
-        ('Screen_D', 'D', 'Screen'),
-        ('Screen_H', 'D', 'Screen'),
-        ('Screen_M', 'D', 'Screen'),
-
-        ('Show_D', 'D', 'Show'),
-        ('Show_H', 'D', 'Show'),
-        ('Show_M', 'D', 'Show'),
+        ('Showing_D', 'D', 'Showing'),
+        ('Showing_H', 'D', 'Showing'),
+        ('Showing_M', 'D', 'Showing'),
 
         ('Movie_1', 'V', 'Movie'),
         ('Movie_2', 'V', 'Movie'),
@@ -93,50 +84,27 @@ INSERT INTO HorizontalFragment
 VALUES ('Theater_H', 'Location = "Hyderabad"');
 
 /*------------------------------------DERIVED HORIZONTAL FRAGMENTATION*/
-SET @ScreenTheaterID  = 0;
+SET @ShowTheaterID  = 0;
 SET @TheaterTheaterID = 0;
 
-SELECT  AttributeID INTO @ScreenTheaterID
+SELECT  AttributeID INTO @ShowTheaterID
 FROM    Attribute
-WHERE   RelationName = 'Screen' AND AttributeName = 'TheaterID';
+WHERE   RelationName = 'Showing' AND AttributeName = 'TheaterID';
 
 SELECT  AttributeID INTO @TheaterTheaterID
 FROM    Attribute
 WHERE   RelationName = 'Theater' AND AttributeName = 'TheaterID';
 
-SELECT @ScreenTheaterID, @TheaterTheaterID;
+SELECT @ShowTheaterID, @TheaterTheaterID;
 
 INSERT INTO DerivedHorizontalFragment
-SELECT 'Screen_D', @ScreenTheaterID, @TheaterTheaterID, 'Theater_D';
+SELECT 'Showing_D', @ShowTheaterID, @TheaterTheaterID, 'Theater_D';
 
 INSERT INTO DerivedHorizontalFragment
-SELECT 'Screen_H', @ScreenTheaterID, @TheaterTheaterID, 'Theater_H';
+SELECT 'Showing_H', @ShowTheaterID, @TheaterTheaterID, 'Theater_H';
 
 INSERT INTO DerivedHorizontalFragment
-SELECT 'Screen_M', @ScreenTheaterID, @TheaterTheaterID, 'Theater_M';
-
-
-SET @ShowScreenID  = 0;
-SET @ScreenScreenID = 0;
-
-SELECT  AttributeID INTO @ShowScreenID
-FROM    Attribute
-WHERE   RelationName = 'Show' AND AttributeName = 'ScreenID';
-
-SELECT  AttributeID INTO @ScreenScreenID
-FROM    Attribute
-WHERE   RelationName = 'Screen' AND AttributeName = 'ScreenID';
-
-SELECT @ShowScreenID, @ScreenScreenID;
-
-INSERT INTO DerivedHorizontalFragment
-SELECT 'Show_D', @ShowScreenID, @ScreenScreenID, 'Screen_D';
-
-INSERT INTO DerivedHorizontalFragment
-SELECT 'Show_H', @ShowScreenID, @ScreenScreenID, 'Screen_H';
-
-INSERT INTO DerivedHorizontalFragment
-SELECT 'Show_M', @ShowScreenID, @ScreenScreenID, 'Screen_M';
+SELECT 'Showing_M', @ShowTheaterID, @TheaterTheaterID, 'Theater_M';
 
 /*----------------------------------------------------SITE*/
 
@@ -157,13 +125,9 @@ VALUES  ('Theater_D', 'Delhi', 'Samosa', 'Samose', 'Samosa', 'Theater'),
         ('Theater_H', 'Hyderabad', 'Samosa', 'Samose', 'Samosa', 'Theater'),
         ('Theater_M', 'Mumbai', 'Samosa', 'Samose', 'Samosa', 'Theater'),
 
-        ('Screen_D', 'Delhi', 'Samosa', 'Samose', 'Samosa', 'Screen'),
-        ('Screen_H', 'Hyderabad', 'Samosa', 'Samose', 'Samosa', 'Screen'),
-        ('Screen_M', 'Mumbai', 'Samosa', 'Samose', 'Samosa', 'Screen'),
-
-        ('Show_D', 'Delhi', 'Samosa', 'Samose', 'Samosa', 'Screening'),
-        ('Show_H', 'Hyderabad', 'Samosa', 'Samose', 'Samosa', 'Screening'),
-        ('Show_M', 'Mumbai', 'Samosa', 'Samose', 'Samosa', 'Screening'),
+        ('Showing_D', 'Delhi', 'Samosa', 'Samose', 'Samosa', 'Showing'),
+        ('Showing_H', 'Hyderabad', 'Samosa', 'Samose', 'Samosa', 'Showing'),
+        ('Showing_M', 'Mumbai', 'Samosa', 'Samose', 'Samosa', 'Showing'),
 
         ('Movie_1', 'Hyderabad', 'Samosa', 'Samose', 'Samosa', 'Movie'),
         ('Movie_2', 'Mumbai', 'Samosa', 'Samose', 'Samosa', 'Movie'),
