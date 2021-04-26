@@ -4,7 +4,7 @@ from .Symbols import Aggregation
 from DDBMS.DB.DBUtils import getDataType
 
 class Column(BasePrimitive):
-    def __init__(self, name : str, table : Table, alias = None, aggregation = Aggregation.NONE, data_type=None, temp_name=None) -> None:
+    def __init__(self, name : str, table : Table, alias = None, aggregation = Aggregation.NONE, data_type=None, temp_name="") -> None:
         self.name = name
         self.table = table
         self.alias = alias
