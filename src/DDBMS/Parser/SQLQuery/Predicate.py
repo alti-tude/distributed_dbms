@@ -46,11 +46,8 @@ class Predicate(BasePrimitive):
                     compact_str += f"'{operand}'"
                 else:
                     compact_str += f"{operand}"
-            elif isinstance(operand, Column):
-                compact_str += operand.compact_display(temp_name)
             else:
-                compact_str += operand.compact_display()
-
+                compact_str += operand.compact_display(temp_name)
         return compact_str + ')'
 
     def to_dict(self):
