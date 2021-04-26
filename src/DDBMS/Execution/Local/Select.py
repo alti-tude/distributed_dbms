@@ -1,14 +1,15 @@
 from DDBMS.Execution import DataTransfer
 from Config import DEBUG
 from DDBMS.Parser.SQLQuery.Predicate import Predicate
-from DDBMS.RATree.Nodes import FinalProjectNode, ProjectNode, RelationNode, SelectNode
+from DDBMS.RATree.Nodes import FinalProjectNode, GroupbyNode, ProjectNode, RelationNode, SelectNode
 from DDBMS.RATree import Node
 from DDBMS.DB import DBUtils, db
 from DDBMS.Parser.SQLQuery.Symbols import PredicateOps
-from DDBMS.Execution.DataTransfer import getTempTableName
 
 def executeSelect(root : Node, query_id, operation_id):
-    print(__name__, type(root))
+    if isinstance(root, GroupbyNode):
+        return
+
     if isinstance(root, RelationNode):
         return root.table
 

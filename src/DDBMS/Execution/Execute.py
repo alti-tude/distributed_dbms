@@ -7,8 +7,9 @@ from DDBMS.Parser.SQLQuery.Table import Table
 from DDBMS.Execution.DataTransfer import getTempTableName
 from . import DataTransfer
 from DDBMS.Execution.Site import Site
-from DDBMS.RATree.Nodes import CrossNode, FinalProjectNode, JoinNode, Node, ProjectNode, RelationNode, SelectNode, UnionNode
+from DDBMS.RATree.Nodes import CrossNode, FinalProjectNode, GroupbyNode, JoinNode, Node, ProjectNode, RelationNode, SelectNode, UnionNode
 from .Local.Select import executeSelect
+import Config
 
 def isSelectBranch(cur_node : Node):
     if isinstance(cur_node, RelationNode):
@@ -25,7 +26,7 @@ def execute(cur_node : Node, query_id):
 
     list(map(lambda child : execute(child, query_id), cur_node.children))
 
-    if isinstance(cur_node, ProjectNode) or isinstance(cur_node, SelectNode):
+    if isinstance(cur_node, (ProjectNode, SelectNode, GroupbyNode)):
         return
 
     if isinstance(cur_node, (UnionNode, CrossNode, FinalProjectNode)):
@@ -41,7 +42,29 @@ def execute(cur_node : Node, query_id):
             if isinstance(cur_node, CrossNode):
                 executeCross(cur_node, query_id, cur_node.operation_id)
             if isinstance(cur_node, FinalProjectNode):
-                executeSelect(cur_node, query_id, cur_node.operation_id)
+                child = cur_node.children[0]
+                if isinstance(child, GroupbyNode):
+                    table_name = getTempTableName(query_id, child.operation_id)
+                    with db.returnLists():
+                        data = DBUtils.selectQuery(
+                            cur_node.cols, 
+                            table_name, 
+                            group_by_cols=child.group_by_columns, 
+                            having_predicate=child.having_predicate
+                        )
+                    
+                    if Config.DEBUG:
+                        with db.returnStrings():
+                            print(DBUtils.selectQuery(
+                                cur_node.cols, 
+                                table_name, 
+                                group_by_cols=child.group_by_columns, 
+                                having_predicate=child.having_predicate
+                            ))
+                    DataTransfer.put(query_id, cur_node.operation_id, data, cur_node.cols, decode=False)
+                    
+                else:
+                    executeSelect(cur_node, query_id, cur_node.operation_id)
         else:
             other_site = cur_node.site
             for child in cur_node.children:
@@ -73,7 +96,6 @@ def execute(cur_node : Node, query_id):
                 with db.returnStrings():
                     semijoin_data = DBUtils\
                                 .semijoinQuery(cur_table, recv_col_as_table, cur_node.predicate_cols[1], cur_node.predicate_cols[0])
-                    print(semijoin_data)
                     
                 with db.returnLists():
                     semijoin_data = DBUtils\
