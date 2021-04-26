@@ -168,6 +168,10 @@ def getRowsAndExecutionSites(node, query_id):
             col.aggregation = aggregation
             node.cols.append(col)
 
+        if Config.DEBUG:
+            print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+            print(node.cols)
+
         num_rows = max_child_rows
     
     if isinstance(node, ProjectNode):
@@ -221,6 +225,7 @@ def buildTree(sql_query : str, query_id):
     root = RATree.optimise()
 
     if Config.DEBUG:
+        print("AFTER OPTIMIZATION:")
         tree = Tree()
         root.to_treelib(tree)
         tree.show()
@@ -229,6 +234,7 @@ def buildTree(sql_query : str, query_id):
     getRowsAndExecutionSites(root, query_id)         
     
     if Config.DEBUG:
+        print("AFTER GETTING EXECUTION SITES")
         tree = Tree()
         root.to_treelib(tree)
         tree.show()
