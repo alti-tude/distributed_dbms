@@ -40,6 +40,8 @@ def send(site : Site, query_id, operation_id, columns : List[Column], data = Non
         "columns": encodeFn(columns)
     }
 
+    print("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW")
+    print(query_id, operation_id)
     url = f"{site.getUrl()}{Routes.INTERNAL.PUT}"
     response = requests.post(url, json=payload)
 
