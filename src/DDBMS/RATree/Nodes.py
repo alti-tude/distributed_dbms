@@ -1,8 +1,10 @@
 from DDBMS.Execution.Site import Site
-from copy import copy, deepcopy
 from DDBMS.BasePrimitive import BasePrimitive
-from typing import List
 from DDBMS.Parser.SQLQuery import Column, Table, Predicate
+import Config
+
+from copy import copy, deepcopy
+from typing import List
 from treelib import Tree
 
 class Node(BasePrimitive):
@@ -73,8 +75,13 @@ class Node(BasePrimitive):
         return new_obj
     
     def to_treelib(self, tree : Tree, is_root=False):
+        if Config.DEBUG:
+            tag = f"{self.compact_display()} :: {[col.temp_name for col in self.cols]}"
+        else:
+            tag = f"{self.compact_display()}"
+
         tree.create_node(
-            tag = f"{self.compact_display()}", 
+            tag = f"{tag}", 
             identifier=str(id(self)), 
             parent=str(id(self.parent)) if self.parent is not None and not is_root else None
         )
@@ -128,7 +135,7 @@ class ProjectNode(Node):
 
 
 class FinalProjectNode(Node):
-    def __init__(self, *, columns : List[Column], children=[]) -> None:
+    def __init__(self, columns : List[Column], children=[]) -> None:
         super().__init__(children=children)
         self.columns = columns
     
@@ -153,9 +160,10 @@ class FinalProjectNode(Node):
         return "FINAL PROJECT: " + columns_str
 
 class GroupbyNode(Node):
-    def __init__(self, *, group_by_columns : List[Column], children = []) -> None:
+    def __init__(self, group_by_columns : List[Column], having_predicate : Predicate, children = []) -> None:
         super().__init__(children=children)
         self.group_by_columns = group_by_columns
+        self.having_predicate = having_predicate
 
     def to_dict(self):
         output = {
@@ -172,10 +180,10 @@ class GroupbyNode(Node):
         for column in self.group_by_columns:
             if columns_str != "":
                 columns_str += ", "
-            columns_str += column.compact_display()
+            columns_str += column.temp_name
 
         if self.site is not None:
-            return "GROUP BY: " + columns_str + " (site: " + str(self.site) + ")" +str(self.operation_id)
+            return "GROUP BY: " + columns_str + f" {self.having_predicate.compact_display()}" + " (site: " + str(self.site) + ")" +str(self.operation_id)
         return "GROUP BY: " + columns_str
 
 

@@ -42,9 +42,8 @@ def crossNodes(nodes):
 
 def addProjectWithoutAgg(sql_query : SQLQuery, cur_root : Node):
     required_columns = []
-    for predicate in sql_query.having:
-        required_columns.extend(predicate.getAllColumns())
-    
+    if isinstance(sql_query.having, Predicate):
+        required_columns.extend(sql_query.having.getAllColumns())
     required_columns.extend(sql_query.groupby)
     required_columns.extend(sql_query.select)
 
@@ -55,11 +54,11 @@ def addProjectWithoutAgg(sql_query : SQLQuery, cur_root : Node):
     required_columns = list(set(required_columns))
     return ProjectNode(columns=required_columns, children=[cur_root])
 
-def addGroupby(group_by_cols, cur_root):
+def addGroupby(group_by_cols, having_predicate : Predicate, cur_root):
     cur_node = cur_root
 
     if len(group_by_cols) > 0:
-        return GroupbyNode(group_by_columns=group_by_cols, children=[cur_node])
+        return GroupbyNode(group_by_cols, having_predicate, children=[cur_node])
 
     return cur_node
 
@@ -76,9 +75,8 @@ class RATreeBuilder:
         self.selected = seperateSelect(self.sql_query.where, self.joined)
         self.project_before_groupby = addProjectWithoutAgg(self.sql_query, self.selected)
 
-        self.gamma_added = addGroupby(self.sql_query.groupby, self.project_before_groupby)
-        self.having_added = seperateSelect(self.sql_query.having, self.gamma_added)
-        self.projected = FinalProjectNode(columns=self.sql_query.select, children=[self.having_added])
+        self.gamma_added = addGroupby(self.sql_query.groupby, self.sql_query.having, self.project_before_groupby)
+        self.projected = FinalProjectNode(columns=self.sql_query.select, children=[self.gamma_added])
 
     def __repr__(self):
         return str(self.projected)
