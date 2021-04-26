@@ -13,8 +13,11 @@ def globalAbort(id):
 
     for site in Site.ALL_SITES:
         url = site.getUrl() + Routes.COMMIT.GLOBAL_ABORT
-        requests.get(url, params={"id": id}, timeout = Config.COMMIT_TIMEOUT)
-    
+        try:
+            requests.get(url, params={"id": id}, timeout = Config.COMMIT_TIMEOUT)
+        except:
+            continue
+
     logger.info("[{id}] end of transaction")
     return False
     
@@ -31,7 +34,7 @@ def twoPC(id, query):
             response = requests.get(url, params={"id": id, "query": query}, timeout = Config.COMMIT_TIMEOUT)
             if response.status_code != 200:
                 raise ValueError()
-        except (ValueError, Timeout):
+        except (ValueError, ConnectionError, Timeout):
             return globalAbort(id)
 
     #send commit
