@@ -14,7 +14,7 @@ SERVER_DB_CONFIG = {
 }
 
 ConfigToUse = SERVER_DB_CONFIG
-GET_RETRY_DELAY = 0.1 #in seconds
+GET_RETRY_DELAY = 0.3 #in seconds
 SELECTIVITY_FACTOR = 0.3
 
 DEBUG = True
