@@ -27,6 +27,7 @@ def twoPC(id, query):
     logger.info(f"[{id}] begin commit")
 
     #send prepare
+    abort_trans = False
     for site in Site.ALL_SITES:
         url = site.getUrl() + Routes.COMMIT.PREPARE
         print(url)
@@ -35,8 +36,11 @@ def twoPC(id, query):
             if response.status_code != 200:
                 raise ValueError()
         except:
-            return globalAbort(id)
+            abort_trans = True
 
+    if abort_trans:
+        return globalAbort(id)
+    
     #send commit
     logger.info(f"[{id}] commit")
     for site in Site.ALL_SITES:
