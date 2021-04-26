@@ -34,7 +34,7 @@ def twoPC(id, query):
             response = requests.get(url, params={"id": id, "query": query}, timeout = Config.COMMIT_TIMEOUT)
             if response.status_code != 200:
                 raise ValueError()
-        except (ValueError, ConnectionError, Timeout):
+        except:
             return globalAbort(id)
 
     #send commit
