@@ -49,7 +49,7 @@ def execute(cur_node : Node, query_id):
                     DataTransfer.send(other_site, query_id, child.operation_id, child.cols)
     
     elif isinstance(cur_node, FinalProjectNode):
-        if cur_node.site != SITE.CUR_SITE:
+        if cur_node.site != Site.CUR_SITE:
             return
         child = cur_node.children[0]
         if isinstance(child, GroupbyNode):
