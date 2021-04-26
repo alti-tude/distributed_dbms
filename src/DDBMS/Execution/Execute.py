@@ -29,7 +29,7 @@ def execute(cur_node : Node, query_id):
     if isinstance(cur_node, (ProjectNode, SelectNode)):
         return
 
-    if isinstance(cur_node, (UnionNode, CrossNode, FinalProjectNode, GroupbyNode)):
+    if isinstance(cur_node, (UnionNode, CrossNode, GroupbyNode)):
         if cur_node.site == Site.CUR_SITE:
             for child in cur_node.children:
                 if child.site == Site.CUR_SITE:
@@ -41,23 +41,6 @@ def execute(cur_node : Node, query_id):
                 executeUnion(cur_node, query_id, cur_node.operation_id)
             if isinstance(cur_node, CrossNode):
                 executeCross(cur_node, query_id, cur_node.operation_id)
-            if isinstance(cur_node, FinalProjectNode):
-                child = cur_node.children[0]
-                if isinstance(child, GroupbyNode):
-                    table_name = getTempTableName(query_id, child.operation_id)
-                    
-                    with db.returnLists():
-                        data = DBUtils.selectQuery(
-                            cur_node.cols, 
-                            Table(table_name), 
-                            group_by_cols=child.group_by_columns, 
-                            having_predicate=child.having_predicate
-                        )
-                    
-                    DataTransfer.put(query_id, cur_node.operation_id, data, cur_node.cols, decode=False)
-                    
-                else:
-                    executeSelect(cur_node, query_id, cur_node.operation_id)
         else:
             other_site = cur_node.site
             for child in cur_node.children:
@@ -65,6 +48,25 @@ def execute(cur_node : Node, query_id):
                     executeSelect(child, query_id, child.operation_id)
                     DataTransfer.send(other_site, query_id, child.operation_id, child.cols)
     
+    elif isinstance(cur_node, FinalProjectNode):
+        if cur_node.site != SITE.CUR_SITE:
+            return
+        child = cur_node.children[0]
+        if isinstance(child, GroupbyNode):
+            table_name = getTempTableName(query_id, child.operation_id)
+            
+            with db.returnLists():
+                data = DBUtils.selectQuery(
+                    cur_node.cols, 
+                    Table(table_name), 
+                    group_by_cols=child.group_by_columns, 
+                    having_predicate=child.having_predicate
+                )
+            
+            DataTransfer.put(query_id, cur_node.operation_id, data, cur_node.cols, decode=False)
+        else:
+            executeSelect(cur_node, query_id, cur_node.operation_id)
+
     elif isinstance(cur_node, JoinNode):
 
         if Site.CUR_SITE in cur_node.child_sites:

@@ -16,16 +16,14 @@ def executeSelect(root : Node, query_id, operation_id):
     predicates = []
     cur_node = root
     
-    cols = []
+    cols = None
     col_temp_names = []
 
     while not isinstance(cur_node, RelationNode):
         if isinstance(cur_node, ProjectNode) or isinstance(cur_node, FinalProjectNode):
-            for col in cur_node.cols:
-                if col.temp_name not in col_temp_names:
-                    cols.append(col)
-                    col_temp_names.append(col.temp_name)
-            print("TEMP NAMES:", col_temp_names)
+            if cols is None:
+                cols = cur_node.cols
+            print("TEMP NAMES:", cols)
             print(cur_node.columns)
 
         if isinstance(cur_node, SelectNode):
