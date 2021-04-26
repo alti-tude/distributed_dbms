@@ -29,7 +29,7 @@ class SQLQuery:
         self.select = []
         self.where = []
         self.groupby = []
-        self.having = []
+        self.having = Predicate(PredicateOps.AND, [])
 
     def addFrom(self, table):
         for old_table in self.tables:
@@ -58,10 +58,7 @@ class SQLQuery:
 
     def addHavingPredicate(self, predicate_dict):
         new_predicate = self.newPredicate(predicate_dict)
-        if new_predicate.operator == PredicateOps.AND:
-            self.having = new_predicate.operands
-        else: 
-            self.having = [new_predicate]
+        self.having = new_predicate
         return self.having
 
     def newTable(self, name, alias=None):

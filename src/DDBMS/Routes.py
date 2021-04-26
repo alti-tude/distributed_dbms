@@ -1,4 +1,5 @@
 class INTERNAL:
+    QUERY = "/internal/query"
     PUT = "/internal/put"
 
 class COMMIT:
