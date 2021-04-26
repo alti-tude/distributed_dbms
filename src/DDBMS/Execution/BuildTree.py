@@ -160,6 +160,7 @@ def getRowsAndExecutionSites(node, query_id):
         #     if col in node.columns:
         #         node.cols.append(col)
 
+        print(node.columns)
         for col in node.columns:
             aggregation = col.aggregation
             col.aggregation = Aggregation.NONE
