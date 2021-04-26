@@ -57,8 +57,6 @@ def put(query_id, operation_id, data, columns, nameFn = None, decode = True):
 
     if Config.DEBUG:
         print("[put]", query_id, operation_id)
-        print("[put]", data)
-        print("[put]", columns)
 
     if nameFn is None:
         nameFn = lambda col : f"{col.temp_name}"

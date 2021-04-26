@@ -161,7 +161,6 @@ def getRowsAndExecutionSites(node, query_id):
         #     if col in node.columns:
         #         node.cols.append(col)
 
-        print(node.columns)
         for col in node.columns:
             aggregation = col.aggregation
             col.aggregation = Aggregation.NONE
@@ -169,10 +168,6 @@ def getRowsAndExecutionSites(node, query_id):
             col.temp_name = children_cols[child_col_idx].temp_name
             col.aggregation = aggregation
             node.cols.append(col)
-
-        if Config.DEBUG:
-            print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-            print(node.cols)
 
         num_rows = max_child_rows
     
