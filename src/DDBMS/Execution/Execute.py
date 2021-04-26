@@ -48,7 +48,7 @@ def execute(cur_node : Node, query_id):
                     with db.returnLists():
                         data = DBUtils.selectQuery(
                             cur_node.cols, 
-                            table_name, 
+                            Table(table_name), 
                             group_by_cols=child.group_by_columns, 
                             having_predicate=child.having_predicate
                         )
@@ -57,7 +57,7 @@ def execute(cur_node : Node, query_id):
                         with db.returnStrings():
                             print(DBUtils.selectQuery(
                                 cur_node.cols, 
-                                table_name, 
+                                Table(table_name), 
                                 group_by_cols=child.group_by_columns, 
                                 having_predicate=child.having_predicate
                             ))
