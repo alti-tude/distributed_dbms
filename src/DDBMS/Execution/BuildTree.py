@@ -114,6 +114,11 @@ def tempNameCols(node, col_store : Union[Predicate,List], agg_check = False):
 
 operation_id = 0
 def getRowsAndExecutionSites(node, query_id):
+    if Config.DEBUG:
+        if isinstance(node, FinalProjectNode):
+            print("zzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
+            print(node.columns)
+
     global operation_id
     node.operation_id = str(operation_id)
     
