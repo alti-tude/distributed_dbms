@@ -95,7 +95,7 @@ def selectQuery(project_cols, from_table, where_predicate=None, group_by_cols = 
     base_query = "SELECT " + project_cols_str + " FROM `" + from_table_str + "`"
     
     if where_predicate is not None and len(where_predicate.operands)!=0:
-        where_predicate_str = where_predicate.compact_display()
+        where_predicate_str = where_predicate.compact_display(temp_name=True)
         base_query = base_query + " WHERE " + where_predicate_str
 
     if group_by_cols is not None:
@@ -111,7 +111,7 @@ def selectQuery(project_cols, from_table, where_predicate=None, group_by_cols = 
         base_query += f" GROUP BY {group_by_cols_str}"
     
     if having_predicate is not None and len(having_predicate.operands) != 0:
-        having_predicate_str = having_predicate.compact_display()
+        having_predicate_str = having_predicate.compact_display(temp_name=True)
         base_query += f" HAVING {having_predicate_str}"
         
     return base_query + ";"
