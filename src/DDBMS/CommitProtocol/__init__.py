@@ -4,6 +4,6 @@ import Config
 
 logging.basicConfig(filename=os.path.join(Config.COMMIT_STATE_FOLDER, "commit_protocol.log"),
                             filemode='a',
-                            level=logging.info)
+                            level=logging.INFO)
 
 logger = logging.getLogger(__name__)
