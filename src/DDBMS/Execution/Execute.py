@@ -29,7 +29,7 @@ def execute(cur_node : Node, query_id):
     if isinstance(cur_node, (ProjectNode, SelectNode)):
         return
 
-    if isinstance(cur_node, (UnionNode, CrossNode, FinalProjectNode)):
+    if isinstance(cur_node, (UnionNode, CrossNode, FinalProjectNode, GroupbyNode)):
         if cur_node.site == Site.CUR_SITE:
             for child in cur_node.children:
                 if child.site == Site.CUR_SITE:
